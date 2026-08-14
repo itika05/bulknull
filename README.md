@@ -176,14 +176,12 @@ For complete methodology see:
 - `tests/` — Regression test specifications with frozen values
 - Package vignettes for case studies
 
-## License
-
-[Pending: University of Washington approval]
 
 ## Authors
 
-**Itika Arora** — Au Lab, University of Washington
+**Itika Arora**
 
 ---
+
 
 **Version**: 0.1.0 | **Updated**: 2025-08-15 | **Repository**: https://github.com/itika05/bulknull
