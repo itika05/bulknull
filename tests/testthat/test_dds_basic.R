@@ -12,7 +12,7 @@ test_that("DDS function computes without error on valid input", {
   expect_type(result, "list")
   expect_named(
     result,
-    c("dds_score", "z_bulk", "mu_dilution", "w", "d_sc", "log_lik_h1", "log_lik_h0", "summary",
+    c("dds_score", "z_bulk", "mu_dilution", "w", "d_sc", "di_ceiling", "log_lik_h1", "log_lik_h0", "summary",
       "applicable", "applicability_note", "call")
   )
 })
