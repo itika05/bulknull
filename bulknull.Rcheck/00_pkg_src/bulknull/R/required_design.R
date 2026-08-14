@@ -24,8 +24,8 @@
 #'   \item{warnings}{Character vector of warnings if targets are unattainable}
 #'
 #' @details
-#' The diagnosability index is defined as: DI = Φ(μ_dilution - z_critical)
-#' where Φ is the standard normal CDF and z_critical depends on alpha and sided.
+#' The diagnosability index is defined as: DI = Normal_CDF(mu - z_critical)
+#' where Normal_CDF is the standard normal CDF and z_critical depends on alpha and sided.
 #'
 #' This function inverts the formula in two ways:
 #' 1. Solves for cluster_fraction given bulk_se, sc_zscore, and condition_fraction
@@ -66,8 +66,8 @@ required_design <- function(target_di, sc_zscore, condition_fraction, n_cluster,
   }
 
   # Solve for mu_dilution using inverse normal CDF
-  # DI = Φ(μ - z_critical)
-  # μ = Φ^{-1}(DI) + z_critical = qnorm(DI) + z_critical
+  # DI = Normal_CDF(mu - z_critical)
+  # mu = Normal_CDF_inverse(DI) + z_critical = qnorm(DI) + z_critical
   mu_dilution_required <- stats::qnorm(target_di) + z_critical
 
   # Compute n_eff_sc from condition_fraction and n_cluster

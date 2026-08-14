@@ -6,6 +6,7 @@ diagnosability_index    Diagnosability Index (DI)
 dilution_scan           Vectorized Dilution Scan Across Multiple Genes
 dilution_score          Dilution Discordance Score (DDS)
 dpp9_m8                 DPP9/M8 Example Dataset
+plot.bulknull           Plot DI Landscape for Study Design
 print.bulknull          Print method for bulknull objects
 print.required_design   Print method for required_design objects
 required_design         Required Study Design to Achieve Target

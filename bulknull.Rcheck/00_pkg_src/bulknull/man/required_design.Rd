@@ -49,8 +49,8 @@ to achieve a target power (DI). Can solve for either cluster_fraction (at fixed
 bulk_se) or bulk_se (at fixed cluster_fraction).
 }
 \details{
-The diagnosability index is defined as: DI = Φ(μ_dilution - z_critical)
-where Φ is the standard normal CDF and z_critical depends on alpha and sided.
+The diagnosability index is defined as: DI = Normal_CDF(mu - z_critical)
+where Normal_CDF is the standard normal CDF and z_critical depends on alpha and sided.
 
 This function inverts the formula in two ways:
 \enumerate{

@@ -22,7 +22,7 @@
 #' @return
 #' A list with elements:
 #'   - dds_score: Posterior probability of dilution (0 to 1).
-#'   - z_bulk: Bulk z-score (β / SE).
+#'   - z_bulk: Bulk z-score (beta / SE).
 #'   - mu_dilution: Expected z under dilution model.
 #'   - log_lik_h1: Log-likelihood under dilution model.
 #'   - log_lik_h0: Log-likelihood under null model.

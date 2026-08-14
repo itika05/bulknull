@@ -16,16 +16,46 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-The **bulknull** package provides tools for assessing whether a non-significant bulk-level result reflects genuine absence of effect or dilution of a signal in a small cell-type subcluster. It implements two key statistics:
+The **bulknull** package provides tools for assessing whether a non-significant bulk-level result reflects genuine absence of effect or dilution of a signal in a small cell-type subcluster.
+
+**Key point:** bulknull asks "IF there were a within-cluster IPF-vs-control effect of size X, would we have power to detect it?" It does NOT measure within-cluster effects directly. You supply a hypothesised effect size (sc_zscore); the package computes:
 
 1. **Dilution Discordance Score (DDS)**: Posterior probability that bulk nullness reflects dilution
-2. **Diagnosability Index (DI)**: Pre-data power assessment for detecting dilution
+2. **Diagnosability Index (DI)**: Statistical power to detect dilution at the hypothesised effect size
 
 ## Installation
 
 ```r
 # Install from GitHub (if available)
 # devtools::install_github("arora-lab/bulknull")
+```
+
+## Obtaining sc_zscore: Computing Within-Cluster Effect Size
+
+The `sc_zscore` input represents a hypothesised within-cluster IPF-vs-control effect size. You must compute this from your own single-cell data by:
+
+1. Subsetting to your target cluster only
+2. Computing pseudobulk (mean expression) per donor
+3. Performing donor-level differential expression (case vs. control)
+4. Extracting the z-score for your gene
+
+**Do NOT use between-state enrichment scores** (e.g., cluster A vs. cluster B). These measure cell-type distinctiveness, not case-vs-control effects.
+
+**Example (pseudocode):**
+```r
+# Subset to target cluster
+m8_cells <- seurat_obj[, seurat_obj$cluster == "M8"]
+
+# Pseudobulk per donor
+pb <- AggregateExpression(m8_cells, group.by = "donor", assays = "RNA")
+
+# Donor-level DE: case vs control
+case_donors <- pb[, metadata[colnames(pb), "condition"] == "case"]
+ctrl_donors <- pb[, metadata[colnames(pb), "condition"] == "control"]
+
+# T-test to z-score
+t_res <- t.test(case_donors["GENE", ], ctrl_donors["GENE", ])
+sc_zscore <- sign(t_res$statistic) * sqrt(t_res$statistic^2 / df)
 ```
 
 ## Quick Start
@@ -37,7 +67,7 @@ library(bulknull)
 data(dpp9_m8)
 ```
 
-The example dataset contains measurements for DPP9 expression in the M8 (inflammatory macrophages) subcluster:
+The example dataset contains measurements for DPP9 expression in the M8 (inflammatory macrophages) subcluster. **The sc_zscore value (2.077409) in this example is a hypothesised effect size, not a measured IPF-vs-control effect within M8.** See above for how to compute a real sc_zscore from your data:
 
 ```{r}
 str(dpp9_m8)

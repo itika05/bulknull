@@ -1,0 +1,172 @@
+---
+title: "Interpreting Low Diagnosability"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Interpreting Low Diagnosability}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Problem Statement
+
+In typical RNA-seq studies, the **Diagnosability Index (DI) is extremely low** — often below 0.1 — even for large single-cell effects. This vignette explains why dilution claims are effectively unfalsifiable at realistic cluster fractions, and what this means for study design.
+
+## The Barrier: Realistic Cluster Fractions
+
+The DI depends on four inputs:
+- **sc_zscore**: Hypothesised within-cluster effect size (driven by biology)
+- **condition_fraction**: Case proportion in cohort (driven by study design)
+- **n_cluster**: Cell count in target cluster (driven by single-cell depth)
+- **bulk_se**: Measurement precision (driven by cohort size)
+- **cluster_fraction**: Proportion of cluster in bulk tissue (driven by cell type composition)
+
+Of these, **cluster_fraction is the bottleneck**. Inflammatory macrophages (M8) comprise ~5–10% of myeloid cells in lung tissue; neural progenitors comprise ~1–5% of brain tissue. These are realistic values for "small" clusters.
+
+Let's load the package and data:
+
+```{r setup}
+library(bulknull)
+data(dpp9_m8)
+```
+
+## Case Study: DPP9 in M8 (Inflammatory Macrophages)
+
+The DPP9/M8 example has:
+- **sc_zscore = 2.077409** (hypothesised donor-level IPF-vs-control z-score)
+- **condition_fraction = 0.631** (63% IPF cases in cohort)
+- **n_cluster = 1332** (M8 cells in single-cell data)
+- **cluster_fraction = 0.069** (M8 as 6.9% of myeloid cells)
+- **bulk_se = 0.062774** (bulk measurement SE for DPP9)
+
+What DI does this achieve?
+
+```{r di_baseline}
+n_eff_sc <- dpp9_m8$condition_fraction * (1 - dpp9_m8$condition_fraction) * dpp9_m8$n_cluster
+d_sc <- dpp9_m8$sc_zscore / sqrt(n_eff_sc)
+d_bulk_expected <- dpp9_m8$cluster_fraction * d_sc
+mu_dilution <- d_bulk_expected / dpp9_m8$bulk_se
+
+di_result <- diagnosability_index(
+  mu_dilution = mu_dilution,
+  alpha = 0.05,
+  sided = "one"
+)
+
+cat("DI at baseline:\n")
+cat("  cluster_fraction =", dpp9_m8$cluster_fraction, "\n")
+cat("  bulk_se =", dpp9_m8$bulk_se, "\n")
+cat("  DI =", round(di_result$di, 4), "\n")
+```
+
+**DI ≈ 0.065** — only 6.5% power. This is severely underpowered.
+
+## Can We Improve DI by Changing Study Design?
+
+The `required_design()` function asks: what would we need to change to achieve a target DI?
+
+### Option 1: Increase cluster_fraction
+
+Can we improve DI by increasing the cluster fraction?
+
+```{r option1}
+design_cf <- required_design(
+  target_di = 0.8,
+  sc_zscore = dpp9_m8$sc_zscore,
+  condition_fraction = dpp9_m8$condition_fraction,
+  n_cluster = dpp9_m8$n_cluster,
+  cluster_fraction = dpp9_m8$cluster_fraction,
+  bulk_se = dpp9_m8$bulk_se
+)
+
+cat(design_cf$scenario_fixed_cf, "\n")
+cat("Required cluster fraction: ",
+    round(design_cf$required_cluster_fraction_raw, 4),
+    " (impossible; maximum = 1.0)\n", sep = "")
+```
+
+Cell-type proportions are fixed by tissue biology and cannot be changed.
+
+### Option 2: Improve bulk measurement precision (decrease bulk_se)
+
+To achieve DI = 0.8, what bulk measurement precision would we need?
+
+```{r option2}
+design_di08 <- required_design(
+  target_di = 0.8,
+  sc_zscore = dpp9_m8$sc_zscore,
+  condition_fraction = dpp9_m8$condition_fraction,
+  n_cluster = dpp9_m8$n_cluster,
+  cluster_fraction = dpp9_m8$cluster_fraction,
+  bulk_se = dpp9_m8$bulk_se
+)
+
+cat(design_di08$scenario_fixed_se, "\n")
+fold_improvement_08 <- dpp9_m8$bulk_se / design_di08$required_bulk_se
+cat("Fold improvement in precision (SE reduction) needed: ",
+    round(fold_improvement_08, 1), "x\n", sep = "")
+```
+
+## Moderate Power is Also Unattainable
+
+To achieve DI = 0.5 (moderate power), what would be required?
+
+```{r option3}
+design_di05 <- required_design(
+  target_di = 0.5,
+  sc_zscore = dpp9_m8$sc_zscore,
+  condition_fraction = dpp9_m8$condition_fraction,
+  n_cluster = dpp9_m8$n_cluster,
+  cluster_fraction = dpp9_m8$cluster_fraction,
+  bulk_se = dpp9_m8$bulk_se
+)
+
+cat(design_di05$scenario_fixed_se, "\n")
+fold_improvement_05 <- dpp9_m8$bulk_se / design_di05$required_bulk_se
+cat("Fold improvement in precision (SE reduction) needed: ",
+    round(fold_improvement_05, 1), "x\n", sep = "")
+```
+
+## Summary: The Power Barrier
+
+1. **Cluster fraction is fixed by biology.** You cannot change the proportion of M8 cells in lung tissue; it is what it is (5–10%).
+
+2. **Bulk measurement precision requires massive cohort expansion.** At realistic cluster fractions, detecting dilution with even moderate power (DI = 0.5) requires hundreds of fold improvements in measurement precision, far beyond the reach of typical RNA-seq cohorts.
+
+3. **At DI < 0.3, any inference is unreliable.** The bulknull framework requires high power to distinguish dilution from true absence of effect. Dilution is not resolvable at realistic cohort sizes.
+
+## When Dilution *Can* Be Resolved
+
+Dilution becomes detectable with:
+- **Large cluster fraction** (≥30% of tissue) — but then the cluster is not "small" and is likely already significant at bulk level
+- **Very large effect size** (sc_zscore ≥ 4) — extreme biology, rare
+- **Alternative assay modalities** with higher resolution or sensitivity
+
+## Practical Recommendations
+
+To resolve within-cluster case-vs-control effects without relying on bulk-level dilution detection:
+
+1. **Enrichment / sorting**: Isolate the target cell type in large numbers (thousands of cells per donor), then measure expression directly without dilution effects.
+
+2. **Single-cell profiling**: Increase donor number to gain statistical power at the single-cell level, where dilution does not confound estimates of within-cluster effects.
+
+3. **Profiling at adequate depth**: Ensure single-cell data has sufficient donor replication (n ≥ 10 donors per condition) to power within-cluster comparisons independently.
+
+These approaches sidestep bulk dilution entirely by measuring within-cluster effects at their native resolution.
+
+## References
+
+- Borenstein, M., et al. (2009). Introduction to Meta-Analysis.
+- Newman, A. M., et al. (2015). Robust enumeration of cell subsets from tissue expression profiles. *Nature Methods*.
+
+## Session Info
+
+```{r}
+sessionInfo()
+```

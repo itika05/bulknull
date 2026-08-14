@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Interpreting Low Diagnosability</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Interpreting Low Diagnosability</h1>
+
+
+
+<div id="problem-statement" class="section level2">
+<h2>Problem Statement</h2>
+<p>In typical RNA-seq studies, the <strong>Diagnosability Index (DI) is
+extremely low</strong> — often below 0.1 — even for large single-cell
+effects. This vignette explains why dilution claims are effectively
+unfalsifiable at realistic cluster fractions, and what this means for
+study design.</p>
+</div>
+<div id="the-barrier-realistic-cluster-fractions" class="section level2">
+<h2>The Barrier: Realistic Cluster Fractions</h2>
+<p>The DI depends on four inputs: - <strong>sc_zscore</strong>:
+Hypothesised within-cluster effect size (driven by biology) -
+<strong>condition_fraction</strong>: Case proportion in cohort (driven
+by study design) - <strong>n_cluster</strong>: Cell count in target
+cluster (driven by single-cell depth) - <strong>bulk_se</strong>:
+Measurement precision (driven by cohort size) -
+<strong>cluster_fraction</strong>: Proportion of cluster in bulk tissue
+(driven by cell type composition)</p>
+<p>Of these, <strong>cluster_fraction is the bottleneck</strong>.
+Inflammatory macrophages (M8) comprise ~5–10% of myeloid cells in lung
+tissue; neural progenitors comprise ~1–5% of brain tissue. These are
+realistic values for “small” clusters.</p>
+<p>Let’s load the package and data:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(bulknull)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(dpp9_m8)</span></code></pre></div>
+</div>
+<div id="case-study-dpp9-in-m8-inflammatory-macrophages" class="section level2">
+<h2>Case Study: DPP9 in M8 (Inflammatory Macrophages)</h2>
+<p>The DPP9/M8 example has: - <strong>sc_zscore = 2.077409</strong>
+(hypothesised donor-level IPF-vs-control z-score) -
+<strong>condition_fraction = 0.631</strong> (63% IPF cases in cohort) -
+<strong>n_cluster = 1332</strong> (M8 cells in single-cell data) -
+<strong>cluster_fraction = 0.069</strong> (M8 as 6.9% of myeloid cells)
+- <strong>bulk_se = 0.062774</strong> (bulk measurement SE for DPP9)</p>
+<p>What DI does this achieve?</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>n_eff_sc <span class="ot">&lt;-</span> dpp9_m8<span class="sc">$</span>condition_fraction <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> dpp9_m8<span class="sc">$</span>condition_fraction) <span class="sc">*</span> dpp9_m8<span class="sc">$</span>n_cluster</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>d_sc <span class="ot">&lt;-</span> dpp9_m8<span class="sc">$</span>sc_zscore <span class="sc">/</span> <span class="fu">sqrt</span>(n_eff_sc)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>d_bulk_expected <span class="ot">&lt;-</span> dpp9_m8<span class="sc">$</span>cluster_fraction <span class="sc">*</span> d_sc</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>mu_dilution <span class="ot">&lt;-</span> d_bulk_expected <span class="sc">/</span> dpp9_m8<span class="sc">$</span>bulk_se</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>di_result <span class="ot">&lt;-</span> <span class="fu">diagnosability_index</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">mu_dilution =</span> mu_dilution,</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="at">alpha =</span> <span class="fl">0.05</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="at">sided =</span> <span class="st">&quot;one&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>)</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;DI at baseline:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; DI at baseline:</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;  cluster_fraction =&quot;</span>, dpp9_m8<span class="sc">$</span>cluster_fraction, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt;   cluster_fraction = 0.06946545</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;  bulk_se =&quot;</span>, dpp9_m8<span class="sc">$</span>bulk_se, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt;   bulk_se = 0.062774</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;  DI =&quot;</span>, <span class="fu">round</span>(di_result<span class="sc">$</span>di, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;   DI = 0.065</span></span></code></pre></div>
+<p><strong>DI ≈ 0.065</strong> — only 6.5% power. This is severely
+underpowered.</p>
+</div>
+<div id="can-we-improve-di-by-changing-study-design" class="section level2">
+<h2>Can We Improve DI by Changing Study Design?</h2>
+<p>The <code>required_design()</code> function asks: what would we need
+to change to achieve a target DI?</p>
+<div id="option-1-increase-cluster_fraction" class="section level3">
+<h3>Option 1: Increase cluster_fraction</h3>
+<p>Can we improve DI by increasing the cluster fraction?</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>design_cf <span class="ot">&lt;-</span> <span class="fu">required_design</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">target_di =</span> <span class="fl">0.8</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">sc_zscore =</span> dpp9_m8<span class="sc">$</span>sc_zscore,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">condition_fraction =</span> dpp9_m8<span class="sc">$</span>condition_fraction,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">n_cluster =</span> dpp9_m8<span class="sc">$</span>n_cluster,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">cluster_fraction =</span> dpp9_m8<span class="sc">$</span>cluster_fraction,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">bulk_se =</span> dpp9_m8<span class="sc">$</span>bulk_se</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="fu">cat</span>(design_cf<span class="sc">$</span>scenario_fixed_cf, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; Target DI = 0.8000 is unattainable (would require cluster_fraction &gt; 1.0).</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Required cluster fraction: &quot;</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="fu">round</span>(design_cf<span class="sc">$</span>required_cluster_fraction_raw, <span class="dv">4</span>),</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="st">&quot; (impossible; maximum = 1.0)</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; Required cluster fraction: 1.3232 (impossible; maximum = 1.0)</span></span></code></pre></div>
+<p>Cell-type proportions are fixed by tissue biology and cannot be
+changed.</p>
+</div>
+<div id="option-2-improve-bulk-measurement-precision-decrease-bulk_se" class="section level3">
+<h3>Option 2: Improve bulk measurement precision (decrease bulk_se)</h3>
+<p>To achieve DI = 0.8, what bulk measurement precision would we
+need?</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>design_di08 <span class="ot">&lt;-</span> <span class="fu">required_design</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="at">target_di =</span> <span class="fl">0.8</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">sc_zscore =</span> dpp9_m8<span class="sc">$</span>sc_zscore,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">condition_fraction =</span> dpp9_m8<span class="sc">$</span>condition_fraction,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">n_cluster =</span> dpp9_m8<span class="sc">$</span>n_cluster,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">cluster_fraction =</span> dpp9_m8<span class="sc">$</span>cluster_fraction,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="at">bulk_se =</span> dpp9_m8<span class="sc">$</span>bulk_se</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="fu">cat</span>(design_di08<span class="sc">$</span>scenario_fixed_se, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; To achieve DI = 0.8000 at cluster_fraction = 0.069465:</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt;   - Required bulk_se: 0.003296</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;   - Current bulk_se: 0.062774</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>fold_improvement_08 <span class="ot">&lt;-</span> dpp9_m8<span class="sc">$</span>bulk_se <span class="sc">/</span> design_di08<span class="sc">$</span>required_bulk_se</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Fold improvement in precision (SE reduction) needed: &quot;</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>    <span class="fu">round</span>(fold_improvement_08, <span class="dv">1</span>), <span class="st">&quot;x</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; Fold improvement in precision (SE reduction) needed: 19x</span></span></code></pre></div>
+</div>
+</div>
+<div id="moderate-power-is-also-unattainable" class="section level2">
+<h2>Moderate Power is Also Unattainable</h2>
+<p>To achieve DI = 0.5 (moderate power), what would be required?</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>design_di05 <span class="ot">&lt;-</span> <span class="fu">required_design</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="at">target_di =</span> <span class="fl">0.5</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">sc_zscore =</span> dpp9_m8<span class="sc">$</span>sc_zscore,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">condition_fraction =</span> dpp9_m8<span class="sc">$</span>condition_fraction,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">n_cluster =</span> dpp9_m8<span class="sc">$</span>n_cluster,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">cluster_fraction =</span> dpp9_m8<span class="sc">$</span>cluster_fraction,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">bulk_se =</span> dpp9_m8<span class="sc">$</span>bulk_se</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">cat</span>(design_di05<span class="sc">$</span>scenario_fixed_se, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; To achieve DI = 0.5000 at cluster_fraction = 0.069465:</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt;   - Required bulk_se: 0.004982</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt;   - Current bulk_se: 0.062774</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>fold_improvement_05 <span class="ot">&lt;-</span> dpp9_m8<span class="sc">$</span>bulk_se <span class="sc">/</span> design_di05<span class="sc">$</span>required_bulk_se</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Fold improvement in precision (SE reduction) needed: &quot;</span>,</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>    <span class="fu">round</span>(fold_improvement_05, <span class="dv">1</span>), <span class="st">&quot;x</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; Fold improvement in precision (SE reduction) needed: 12.6x</span></span></code></pre></div>
+</div>
+<div id="summary-the-power-barrier" class="section level2">
+<h2>Summary: The Power Barrier</h2>
+<ol style="list-style-type: decimal">
+<li><p><strong>Cluster fraction is fixed by biology.</strong> You cannot
+change the proportion of M8 cells in lung tissue; it is what it is
+(5–10%).</p></li>
+<li><p><strong>Bulk measurement precision requires massive cohort
+expansion.</strong> At realistic cluster fractions, detecting dilution
+with even moderate power (DI = 0.5) requires hundreds of fold
+improvements in measurement precision, far beyond the reach of typical
+RNA-seq cohorts.</p></li>
+<li><p><strong>At DI &lt; 0.3, any inference is unreliable.</strong> The
+bulknull framework requires high power to distinguish dilution from true
+absence of effect. Dilution is not resolvable at realistic cohort
+sizes.</p></li>
+</ol>
+</div>
+<div id="when-dilution-can-be-resolved" class="section level2">
+<h2>When Dilution <em>Can</em> Be Resolved</h2>
+<p>Dilution becomes detectable with: - <strong>Large cluster
+fraction</strong> (≥30% of tissue) — but then the cluster is not “small”
+and is likely already significant at bulk level - <strong>Very large
+effect size</strong> (sc_zscore ≥ 4) — extreme biology, rare -
+<strong>Alternative assay modalities</strong> with higher resolution or
+sensitivity</p>
+</div>
+<div id="practical-recommendations" class="section level2">
+<h2>Practical Recommendations</h2>
+<p>To resolve within-cluster case-vs-control effects without relying on
+bulk-level dilution detection:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Enrichment / sorting</strong>: Isolate the target cell
+type in large numbers (thousands of cells per donor), then measure
+expression directly without dilution effects.</p></li>
+<li><p><strong>Single-cell profiling</strong>: Increase donor number to
+gain statistical power at the single-cell level, where dilution does not
+confound estimates of within-cluster effects.</p></li>
+<li><p><strong>Profiling at adequate depth</strong>: Ensure single-cell
+data has sufficient donor replication (n ≥ 10 donors per condition) to
+power within-cluster comparisons independently.</p></li>
+</ol>
+<p>These approaches sidestep bulk dilution entirely by measuring
+within-cluster effects at their native resolution.</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li>Borenstein, M., et al. (2009). Introduction to Meta-Analysis.</li>
+<li>Newman, A. M., et al. (2015). Robust enumeration of cell subsets
+from tissue expression profiles. <em>Nature Methods</em>.</li>
+</ul>
+</div>
+<div id="session-info" class="section level2">
+<h2>Session Info</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; R version 4.5.3 (2026-03-11)</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; Platform: aarch64-apple-darwin20</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; Running under: macOS 27.0</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; Matrix products: default</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRblas.0.dylib </span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; [1] C/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; time zone: Asia/Riyadh</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; [1] bulknull_0.1.0</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt;  [1] digest_0.6.39   R6_2.6.1        fastmap_1.2.0   xfun_0.57      </span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt;  [5] cachem_1.1.0    knitr_1.51      htmltools_0.5.9 rmarkdown_2.31 </span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt;  [9] lifecycle_1.0.5 cli_3.6.6       sass_0.4.10     jquerylib_0.1.4</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; [13] compiler_4.5.3  tools_4.5.3     evaluate_1.0.5  bslib_0.10.0   </span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt; [17] yaml_2.3.12     otel_0.2.0      rlang_1.2.0     jsonlite_2.0.0</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

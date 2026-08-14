@@ -45,7 +45,7 @@ when bulk FDR is significant. Default: "warn".}
 A list with elements:
 \itemize{
 \item dds_score: Posterior probability of dilution (0 to 1).
-\item z_bulk: Bulk z-score (β / SE).
+\item z_bulk: Bulk z-score (beta / SE).
 \item mu_dilution: Expected z under dilution model.
 \item log_lik_h1: Log-likelihood under dilution model.
 \item log_lik_h0: Log-likelihood under null model.

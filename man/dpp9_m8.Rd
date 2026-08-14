@@ -39,8 +39,8 @@ single-cell analysis reveals strong inflammasome-module enrichment in M8.
 The DDS computes whether the bulk null reflects true absence or dilution
 of this M8 signal by the dominant other cell types.
 
-\strong{Result:} DDS ≈ 0.48 (ambiguous), suggesting both null and dilution
-remain plausible. The Diagnosability Index (DI ≈ 0.065) reveals that the
+\strong{Result:} DDS ~ 0.48 (ambiguous), suggesting both null and dilution
+remain plausible. The Diagnosability Index (DI ~ 0.065) reveals that the
 study design is fundamentally underpowered for dilution detection due to
 the small M8 fraction (6.95\% of lung), independent of effect size.
 }

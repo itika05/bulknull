@@ -6,11 +6,11 @@
     GNU Fortran (GCC) 14.2.0
 * running under: macOS 27.0
 * using session charset: UTF-8
-* using options ‘--no-manual --as-cran’
+* using option ‘--as-cran’
 * checking for file ‘bulknull/DESCRIPTION’ ... OK
 * this is package ‘bulknull’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [3s/14s] NOTE
+* checking CRAN incoming feasibility ... [2s/15s] NOTE
 Maintainer: ‘Itika Arora <itiarora@alfaisal.edu>’
 
 New submission
@@ -28,7 +28,10 @@ New submission
 * checking for future file timestamps ... OK
 * checking ‘build’ directory ... OK
 * checking DESCRIPTION meta-information ... OK
-* checking top-level files ... OK
+* checking top-level files ... NOTE
+File
+  LICENSE
+is not mentioned in the DESCRIPTION file.
 * checking for left-over files ... OK
 * checking index information ... OK
 * checking package subdirectories ... OK
@@ -67,7 +70,12 @@ New submission
 * checking for unstated dependencies in vignettes ... OK
 * checking package vignettes ... OK
 * checking re-building of vignette outputs ... OK
+* checking PDF version of manual ... OK
+* checking HTML version of manual ... NOTE
+Skipping checking HTML validation: 'tidy' doesn't look like recent enough HTML Tidy.
+Please obtain a recent version of HTML Tidy by downloading a binary
+release or compiling the source code from <https://www.html-tidy.org/>.
 * checking for non-standard things in the check directory ... OK
 * checking for detritus in the temp directory ... OK
 * DONE
-Status: 1 NOTE
+Status: 3 NOTEs

@@ -4,6 +4,7 @@ diagnosability_index	diagnosability_index
 dilution_scan	dilution_scan
 dilution_score	dilution_score
 dpp9_m8	dpp9_m8
+plot.bulknull	plot.bulknull
 print.bulknull	print.bulknull
 print.required_design	print.required_design
 required_design	required_design
