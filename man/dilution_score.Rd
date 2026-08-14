@@ -12,6 +12,7 @@ dilution_score(
   sc_zscore = NULL,
   cluster_fraction,
   condition_fraction,
+  r = 1,
   n_cluster = NULL,
   n_eff_basis = c("cell", "donor"),
   n_donors = NULL,
@@ -39,6 +40,11 @@ responsible subcluster (0 < f <= 1).}
 \item{condition_fraction}{Numeric. Fraction of subcluster cells from the
 condition of interest (e.g., IPF, 0 <= p <= 1).}
 
+\item{r}{Numeric. Relative expression: mean expression of gene in condition divided by
+mean expression across whole compartment. Default r = 1. The mixture weight
+w = (f\emph{r)/(f}r + (1-f)) is bounded above by 1, so mu_dilution is bounded
+by d_sc/bulk_se regardless of r value.}
+
 \item{n_cluster}{Integer. Number of cells in the subcluster. Required if sc_zscore supplied.}
 
 \item{n_eff_basis}{Character. Basis for sc_zscore conversion: "cell" or "donor".
@@ -55,9 +61,10 @@ when bulk FDR is significant. Default: "warn".}
 \value{
 A list with elements:
 \itemize{
-\item dds_score: Posterior probability of dilution (0 to 1).
+\item dds_score: Posterior probability of dilution, between 0 and 1.
 \item z_bulk: Bulk z-score (beta / SE).
 \item mu_dilution: Expected z under dilution model.
+\item w: Mixture weight = (f\emph{r)/(f}r + (1-f)), bounded between 0 and 1.
 \item d_sc: Standardized effect size used (supplied or converted).
 \item log_lik_h1: Log-likelihood under dilution model.
 \item log_lik_h0: Log-likelihood under null model.

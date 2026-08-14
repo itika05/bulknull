@@ -107,22 +107,25 @@ bulknull <- function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore = NULL
 
   # Step 4: Compute type S and type M (under N(mu, 1))
   mu <- dds_result$mu_dilution
-  z_crit <- if (sided == "one") qnorm(1 - alpha) else qnorm(1 - alpha / 2)
+  c <- if (sided == "one") qnorm(1 - alpha) else qnorm(1 - alpha / 2)
 
-  # P(significant) under true effect
-  p_sig <- 1 - pnorm(z_crit, mean = mu, sd = 1) + pnorm(-z_crit, mean = mu, sd = 1)
+  # P(significant) using closed form
+  p_sig <- pnorm(-c - mu) + (1 - pnorm(c - mu))
 
   # Type S = P(sign error | significant)
-  # = P(z < -z_crit) / [P(z < -z_crit) + P(z > z_crit)]
-  p_neg <- pnorm(-z_crit, mean = mu, sd = 1)
-  p_pos <- 1 - pnorm(z_crit, mean = mu, sd = 1)
-  type_s <- if (p_sig > 0) p_neg / p_sig else NA_real_
+  type_s <- if (p_sig > 0) pnorm(-c - mu) / p_sig else NA_real_
 
-  # Type M = E[|z| | |z| > z_crit] / mu
-  # E[|z| | |z| > z_crit] requires numerical integration
-  # Approximation: for positive mu and z > z_crit, use tail expectation
-  mean_pos <- (dnorm(z_crit, mean = mu, sd = 1) - dnorm(-z_crit, mean = mu, sd = 1)) / (p_sig + 1e-16)
-  type_m <- if (mu > 0 && p_sig > 0) mean_pos / mu else NA_real_
+  # Type M = E[|z| | |z| > c] / mu using exact closed form
+  # E[|z| | |z| > c] * P(sig) = mu*(1-Phi(c-mu)) + phi(c-mu) - mu*Phi(-c-mu) + phi(-c-mu)
+  if (p_sig > 0 && mu > 0) {
+    numerator <- mu * (1 - pnorm(c - mu)) + dnorm(c - mu) -
+                 mu * pnorm(-c - mu) + dnorm(-c - mu)
+    e_abs_sig <- numerator / p_sig
+    type_m <- e_abs_sig / mu
+  } else {
+    e_abs_sig <- NA_real_
+    type_m <- NA_real_
+  }
 
   # Build verdict (simplified, no interpretation bands per TASK 4)
   verdict <- if (!applicability$applicable) {
@@ -182,10 +185,11 @@ bulknull <- function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore = NULL
     .di_full = di_result
   )
 
-  # Add type S, type M, and DDS only when verbose=TRUE
+  # Add type S, type M, DDS, and intermediate values only when verbose=TRUE
   if (verbose) {
     result$type_s <- type_s
     result$type_m <- type_m
+    result$e_abs_sig <- e_abs_sig
     result$p_sig <- p_sig
     result$dds <- dds_result$dds_score
   }

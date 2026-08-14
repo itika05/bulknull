@@ -389,6 +389,9 @@ $w
 $d_sc
 [1] 0.117962
 
+$di_ceiling
+[1] 0.6322057
+
 $log_lik_h1
 [1] -1.121789
 
@@ -434,6 +437,9 @@ $w
 
 $d_sc
 [1] 0.1179388
+
+$di_ceiling
+[1] 0.6320585
 
 $log_lik_h1
 [1] -1.121772
@@ -560,7 +566,7 @@ To achieve DI = 0.3000 at cluster_fraction = 0.069465:
 > cleanEx()
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  0.155 0.009 0.165 0 0 
+Time elapsed:  0.156 0.01 0.167 0 0 
 > grDevices::dev.off()
 null device 
           1 

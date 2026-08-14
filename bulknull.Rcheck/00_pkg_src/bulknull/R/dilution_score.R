@@ -30,10 +30,10 @@
 #'
 #' @return
 #' A list with elements:
-#'   - dds_score: Posterior probability of dilution (0 to 1).
+#'   - dds_score: Posterior probability of dilution, between 0 and 1.
 #'   - z_bulk: Bulk z-score (beta / SE).
 #'   - mu_dilution: Expected z under dilution model.
-#'   - w: Mixture weight = (f*r)/(f*r + (1-f)), bounded by [0, 1].
+#'   - w: Mixture weight = (f*r)/(f*r + (1-f)), bounded between 0 and 1.
 #'   - d_sc: Standardized effect size used (supplied or converted).
 #'   - log_lik_h1: Log-likelihood under dilution model.
 #'   - log_lik_h0: Log-likelihood under null model.
@@ -139,6 +139,10 @@ dilution_score <- function(
   d_bulk_expected <- w * d_sc
   mu_dilution <- d_bulk_expected / bulk_se
 
+  # Compute DI ceiling (supremum when w -> 1)
+  mu_ceiling <- d_sc / bulk_se
+  di_ceiling <- stats::pnorm(mu_ceiling - stats::qnorm(1 - 0.05))
+
   # Likelihood ratio test
   log_lik_h1 <- dnorm(z_bulk, mean = mu_dilution, sd = 1, log = TRUE)
   log_lik_h0 <- dnorm(z_bulk, mean = 0, sd = 1, log = TRUE)
@@ -169,6 +173,7 @@ dilution_score <- function(
       mu_dilution = mu_dilution,
       w = w,
       d_sc = d_sc,
+      di_ceiling = di_ceiling,
       log_lik_h1 = log_lik_h1,
       log_lik_h0 = log_lik_h0,
       summary = interpretation,

@@ -50,108 +50,7 @@ New submission
 * checking Rd line widths ... OK
 * checking Rd cross-references ... OK
 * checking for missing documentation entries ... OK
-* checking for code/documentation mismatches ... WARNING
-Codoc mismatches from Rd file 'bulknull.Rd':
-bulknull
-  Code: function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore =
-                 NULL, cluster_fraction, condition_fraction, r = 1,
-                 n_cluster = NULL, n_eff_basis = c("cell", "donor"),
-                 n_donors = NULL, null_fdr_threshold = 0.05,
-                 on_violation = c("error", "warn", "pass"), alpha =
-                 0.05, sided = c("one", "two"), verbose = FALSE)
-  Docs: function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore =
-                 NULL, cluster_fraction, condition_fraction, n_cluster
-                 = NULL, n_eff_basis = c("cell", "donor"), n_donors =
-                 NULL, null_fdr_threshold = 0.05, on_violation =
-                 c("error", "warn", "pass"), alpha = 0.05, sided =
-                 c("one", "two"))
-  Argument names in code not in docs:
-    r verbose
-  Mismatches in argument names (first 3):
-    Position: 8 Code: r Docs: n_cluster
-    Position: 9 Code: n_cluster Docs: n_eff_basis
-    Position: 10 Code: n_eff_basis Docs: n_donors
-
-Codoc mismatches from Rd file 'cohort_inflation.Rd':
-cohort_inflation
-  Code: function(mu_observed, target_di = 0.8, r = 1, alpha = 0.05,
-                 sided = c("one", "two"))
-  Docs: function(mu_observed, target_di = 0.8, alpha = 0.05, sided =
-                 c("one", "two"))
-  Argument names in code not in docs:
-    r
-  Mismatches in argument names:
-    Position: 3 Code: r Docs: alpha
-    Position: 4 Code: alpha Docs: sided
-
-Codoc mismatches from Rd file 'critical_precision.Rd':
-critical_precision
-  Code: function(d_sc, bulk_se, target_di = 0.8, r = 1, alpha = 0.05,
-                 sided = c("one", "two"))
-  Docs: function(d_sc, bulk_se, target_di = 0.8, alpha = 0.05, sided =
-                 c("one", "two"))
-  Argument names in code not in docs:
-    r
-  Mismatches in argument names:
-    Position: 4 Code: r Docs: alpha
-    Position: 5 Code: alpha Docs: sided
-
-Codoc mismatches from Rd file 'dilution_scan.Rd':
-dilution_scan
-  Code: function(bulk_deg, d_sc_values = NULL, sc_zscores = NULL,
-                 cluster_fraction, condition_fraction, r = 1, n_cluster
-                 = NULL, n_eff_basis = c("cell", "donor"), n_donors =
-                 NULL, null_fdr_threshold = 0.05, alpha = 0.05, sided =
-                 c("one", "two"))
-  Docs: function(bulk_deg, d_sc_values = NULL, sc_zscores = NULL,
-                 cluster_fraction, condition_fraction, n_cluster =
-                 NULL, n_eff_basis = c("cell", "donor"), n_donors =
-                 NULL, null_fdr_threshold = 0.05, alpha = 0.05, sided =
-                 c("one", "two"))
-  Argument names in code not in docs:
-    r
-  Mismatches in argument names (first 3):
-    Position: 6 Code: r Docs: n_cluster
-    Position: 7 Code: n_cluster Docs: n_eff_basis
-    Position: 8 Code: n_eff_basis Docs: n_donors
-
-Codoc mismatches from Rd file 'dilution_score.Rd':
-dilution_score
-  Code: function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore =
-                 NULL, cluster_fraction, condition_fraction, r = 1,
-                 n_cluster = NULL, n_eff_basis = c("cell", "donor"),
-                 n_donors = NULL, null_fdr_threshold = 0.05,
-                 on_violation = c("error", "warn", "pass"))
-  Docs: function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore =
-                 NULL, cluster_fraction, condition_fraction, n_cluster
-                 = NULL, n_eff_basis = c("cell", "donor"), n_donors =
-                 NULL, null_fdr_threshold = 0.05, on_violation =
-                 c("error", "warn", "pass"))
-  Argument names in code not in docs:
-    r
-  Mismatches in argument names (first 3):
-    Position: 8 Code: r Docs: n_cluster
-    Position: 9 Code: n_cluster Docs: n_eff_basis
-    Position: 10 Code: n_eff_basis Docs: n_donors
-
-Codoc mismatches from Rd file 'required_design.Rd':
-required_design
-  Code: function(target_di, d_sc = NULL, sc_zscore = NULL,
-                 condition_fraction, r = 1, n_cluster = NULL,
-                 n_eff_basis = c("cell", "donor"), n_donors = NULL,
-                 cluster_fraction, bulk_se, alpha = 0.05, sided =
-                 c("one", "two"))
-  Docs: function(target_di, d_sc = NULL, sc_zscore = NULL,
-                 condition_fraction, n_cluster = NULL, n_eff_basis =
-                 c("cell", "donor"), n_donors = NULL, cluster_fraction,
-                 bulk_se, alpha = 0.05, sided = c("one", "two"))
-  Argument names in code not in docs:
-    r
-  Mismatches in argument names (first 3):
-    Position: 5 Code: r Docs: n_cluster
-    Position: 6 Code: n_cluster Docs: n_eff_basis
-    Position: 7 Code: n_eff_basis Docs: n_donors
-
+* checking for code/documentation mismatches ... OK
 * checking Rd \usage sections ... OK
 * checking Rd contents ... OK
 * checking for unstated dependencies in examples ... OK
@@ -178,7 +77,7 @@ Last 13 lines of output:
   `expected`: TRUE 
   
   
-  [ FAIL 8 | WARN 0 | SKIP 0 | PASS 149 ]
+  [ FAIL 9 | WARN 0 | SKIP 0 | PASS 170 ]
   Error:
   ! Test failures.
   Execution halted
@@ -193,4 +92,4 @@ release or compiling the source code from <https://www.html-tidy.org/>.
 * checking for non-standard things in the check directory ... OK
 * checking for detritus in the temp directory ... OK
 * DONE
-Status: 1 ERROR, 1 WARNING, 2 NOTEs
+Status: 1 ERROR, 2 NOTEs

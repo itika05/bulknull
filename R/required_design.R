@@ -8,6 +8,7 @@
 #' @param d_sc numeric; standardized effect size in single-cell cluster (primary input)
 #' @param sc_zscore numeric; single-cell z-score (backward compatibility)
 #' @param condition_fraction numeric; fraction of cells in case condition (0 to 1)
+#' @param r numeric; relative expression parameter. Default 1.
 #' @param n_cluster numeric; number of cells in target cluster (required if sc_zscore supplied)
 #' @param n_eff_basis character; basis for conversion: "cell" or "donor"
 #' @param n_donors numeric; number of donors (required if n_eff_basis = "donor")

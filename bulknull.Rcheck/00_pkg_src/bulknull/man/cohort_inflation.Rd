@@ -7,6 +7,7 @@
 cohort_inflation(
   mu_observed,
   target_di = 0.8,
+  r = 1,
   alpha = 0.05,
   sided = c("one", "two")
 )
@@ -15,6 +16,8 @@ cohort_inflation(
 \item{mu_observed}{numeric; observed effect size (bulk z-score / sqrt(n_eff_bulk))}
 
 \item{target_di}{numeric; target diagnosability index (0 to 1, default 0.8)}
+
+\item{r}{numeric; relative expression parameter. Default 1 (no adjustment). Used for reference only.}
 
 \item{alpha}{numeric; significance level (default 0.05)}
 

@@ -9,6 +9,7 @@ required_design(
   d_sc = NULL,
   sc_zscore = NULL,
   condition_fraction,
+  r = 1,
   n_cluster = NULL,
   n_eff_basis = c("cell", "donor"),
   n_donors = NULL,
@@ -26,6 +27,8 @@ required_design(
 \item{sc_zscore}{numeric; single-cell z-score (backward compatibility)}
 
 \item{condition_fraction}{numeric; fraction of cells in case condition (0 to 1)}
+
+\item{r}{numeric; relative expression parameter. Default 1.}
 
 \item{n_cluster}{numeric; number of cells in target cluster (required if sc_zscore supplied)}
 

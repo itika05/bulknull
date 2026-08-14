@@ -12,13 +12,15 @@ bulknull(
   sc_zscore = NULL,
   cluster_fraction,
   condition_fraction,
+  r = 1,
   n_cluster = NULL,
   n_eff_basis = c("cell", "donor"),
   n_donors = NULL,
   null_fdr_threshold = 0.05,
   on_violation = c("error", "warn", "pass"),
   alpha = 0.05,
-  sided = c("one", "two")
+  sided = c("one", "two"),
+  verbose = FALSE
 )
 }
 \arguments{
@@ -36,6 +38,9 @@ bulknull(
 
 \item{condition_fraction}{numeric; fraction of cells in case condition}
 
+\item{r}{numeric; relative expression (mean in condition / mean across compartment).
+Default 1 (no relative expression adjustment).}
+
 \item{n_cluster}{numeric; number of cells in target cluster (required if sc_zscore supplied)}
 
 \item{n_eff_basis}{character; basis for sc_zscore conversion: "cell" or "donor"}
@@ -49,18 +54,22 @@ bulknull(
 \item{alpha}{numeric; significance level for DI (default 0.05)}
 
 \item{sided}{character; "one" or "two" for DI computation (default "one")}
+
+\item{verbose}{logical; if TRUE, include type_s, type_m, and detailed DDS. Default FALSE.}
 }
 \value{
 An S3 object of class "bulknull" containing:
-\item{inputs}{List of input parameters}
-\item{applicability}{List with $applicable (logical) and $note (character)}
-\item{dds}{DDS (Dilution Discordance Score) value}
 \item{mu_dilution}{Expected bulk z-score under dilution hypothesis}
 \item{z_bulk}{Observed bulk z-score}
-\item{d_sc}{Standardized effect size used}
+\item{w}{Mixture weight used}
 \item{di}{Diagnosability Index value}
-\item{verdict}{Interpretive string (e.g., "Ambiguous")}
-\item{gate_status}{Character indicating whether input passed the gate}
+\item{r}{Relative expression parameter used}
+\item{verdict}{Interpretive verdict}
+\item{inputs}{List of all input parameters}
+\item{applicability}{List with $applicable and $note}
+\item{type_s}{Type S error rate (when verbose=TRUE)}
+\item{type_m}{Type M error ratio (when verbose=TRUE)}
+\item{dds}{DDS value (when verbose=TRUE only)}
 }
 \description{
 Unified interface that runs the applicability gate, computes the Dilution
@@ -73,11 +82,11 @@ The bulknull workflow is:
 \item Check applicability: bulk FDR > threshold (default 0.05)
 \item If applicable, compute DDS (posterior probability of dilution)
 \item Compute DI (power to detect dilution)
-\item Return formatted S3 object with interpretation bands
+\item Optionally compute type_s and type_m under model uncertainty
 }
 
-The function preserves the full output of dilution_score() and
-diagnosability_index() internally for inspection if needed.
+The mixture weight w = (f\emph{r)/(f}r + (1-f)) incorporates relative expression.
+At r=1, this reduces to w=f, recovering the standard dilution model.
 }
 \examples{
 # Example: DPP9 in M8 (direct d_sc input, recommended)

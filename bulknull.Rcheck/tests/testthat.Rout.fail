@@ -23,9 +23,10 @@ Saving _problems/test_bulknull_wrapper-67.R
 Saving _problems/test_bulknull_wrapper-68.R
 Saving _problems/test_bulknull_wrapper-99.R
 Saving _problems/test_bulknull_wrapper-111.R
+Saving _problems/test_dds_basic-17.R
 Saving _problems/test_dilution_scan-111.R
 Saving _problems/test_dilution_scan-113.R
-[ FAIL 8 | WARN 0 | SKIP 0 | PASS 149 ]
+[ FAIL 9 | WARN 0 | SKIP 0 | PASS 170 ]
 
 ══ Failed tests ════════════════════════════════════════════════════════════════
 ── Failure ('test_bulknull_wrapper.R:18:3'): bulknull() returns correct S3 class and structure ──
@@ -68,6 +69,18 @@ Backtrace:
  10. ├─base::summary(result)
  11. └─bulknull:::summary.bulknull(result)
  12.   └─base::cat(...)
+── Failure ('test_dds_basic.R:13:3'): DDS function computes without error on valid input ──
+Expected `result` to have names `c(...)`.
+Differences:
+    actual        | expected         
+[3] "mu_dilution" | "mu_dilution" [3]
+[4] "w"           | "w"           [4]
+[5] "d_sc"        | "d_sc"        [5]
+[6] "di_ceiling"  -                  
+[7] "log_lik_h1"  | "log_lik_h1"  [6]
+[8] "log_lik_h0"  | "log_lik_h0"  [7]
+[9] "summary"     | "summary"     [8]
+
 ── Failure ('test_dilution_scan.R:111:3'): dilution_scan() computes correct DDS and DI for passing genes ──
 Expected `result$dds > 0 && result$dds < 1` to be TRUE.
 Differences:
@@ -81,7 +94,7 @@ Differences:
 `expected`: TRUE 
 
 
-[ FAIL 8 | WARN 0 | SKIP 0 | PASS 149 ]
+[ FAIL 9 | WARN 0 | SKIP 0 | PASS 170 ]
 Error:
 ! Test failures.
 Execution halted

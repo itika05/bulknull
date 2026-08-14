@@ -8,6 +8,7 @@ critical_precision(
   d_sc,
   bulk_se,
   target_di = 0.8,
+  r = 1,
   alpha = 0.05,
   sided = c("one", "two")
 )
@@ -18,6 +19,8 @@ critical_precision(
 \item{bulk_se}{numeric; observed bulk measurement standard error}
 
 \item{target_di}{numeric; target diagnosability index (0 to 1, default 0.8)}
+
+\item{r}{numeric; relative expression parameter. Default 1 (no adjustment). Used for reference only.}
 
 \item{alpha}{numeric; significance level (default 0.05)}
 

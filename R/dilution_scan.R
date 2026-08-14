@@ -15,6 +15,7 @@
 #'   (constant across all genes).
 #' @param condition_fraction numeric; fraction of cells in case condition
 #'   (constant across all genes).
+#' @param r numeric; relative expression parameter. Default 1.
 #' @param n_cluster numeric; number of cells in target cluster
 #'   (constant across all genes). Required if sc_zscores supplied.
 #' @param n_eff_basis character; "cell" or "donor" basis for z-score conversion.

@@ -10,6 +10,7 @@ dilution_scan(
   sc_zscores = NULL,
   cluster_fraction,
   condition_fraction,
+  r = 1,
   n_cluster = NULL,
   n_eff_basis = c("cell", "donor"),
   n_donors = NULL,
@@ -34,6 +35,8 @@ Genes not in either vector are skipped with a note.}
 
 \item{condition_fraction}{numeric; fraction of cells in case condition
 (constant across all genes).}
+
+\item{r}{numeric; relative expression parameter. Default 1.}
 
 \item{n_cluster}{numeric; number of cells in target cluster
 (constant across all genes). Required if sc_zscores supplied.}
