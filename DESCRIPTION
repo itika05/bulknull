@@ -15,7 +15,7 @@ Description: Diagnostics for bulk transcriptomic null results in studies that
     Diagnosability Index quantifying whether the study design has power to make
     that distinction at all. Includes an applicability gate that refuses
     bulk-significant inputs.
-License: MIT + file LICENSE
+License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

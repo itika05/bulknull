@@ -1,5 +1,13 @@
 # Deferred Issues and Future Work
 
+## License and Copyright Holder (PENDING)
+
+**Status:** Pending Alfaisal University Technology Transfer Office clearance.
+
+**Note:** The package is currently licensed under GPL-3 provisionally. The copyright holder string in DESCRIPTION is currently "Alfaisal University" (pending confirmation). The final license and copyright attribution depend on the University's IP Policy review and Technology Transfer Office approval. Do not create a public repository or DOI until this is confirmed.
+
+---
+
 ## Within-M8 IPF-vs-Control Effect Estimation
 
 **Status:** Deferred; not required for current claims.
