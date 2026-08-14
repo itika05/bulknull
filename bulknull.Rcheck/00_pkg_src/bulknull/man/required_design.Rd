@@ -6,9 +6,12 @@
 \usage{
 required_design(
   target_di,
-  sc_zscore,
+  d_sc = NULL,
+  sc_zscore = NULL,
   condition_fraction,
-  n_cluster,
+  n_cluster = NULL,
+  n_eff_basis = c("cell", "donor"),
+  n_donors = NULL,
   cluster_fraction,
   bulk_se,
   alpha = 0.05,
@@ -18,11 +21,17 @@ required_design(
 \arguments{
 \item{target_di}{numeric; target diagnosability index (0 to 1)}
 
-\item{sc_zscore}{numeric; single-cell z-score for the signal}
+\item{d_sc}{numeric; standardized effect size in single-cell cluster (primary input)}
+
+\item{sc_zscore}{numeric; single-cell z-score (backward compatibility)}
 
 \item{condition_fraction}{numeric; fraction of cells in case condition (0 to 1)}
 
-\item{n_cluster}{numeric; number of cells in target cluster}
+\item{n_cluster}{numeric; number of cells in target cluster (required if sc_zscore supplied)}
+
+\item{n_eff_basis}{character; basis for conversion: "cell" or "donor"}
+
+\item{n_donors}{numeric; number of donors (required if n_eff_basis = "donor")}
 
 \item{cluster_fraction}{numeric; fraction of total cells in target cluster}
 

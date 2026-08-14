@@ -18,8 +18,8 @@ Type 'q()' to quit R.
 > library(testthat)
 > library(bulknull)
 > test_check("bulknull")
-[ FAIL 0 | WARN 0 | SKIP 0 | PASS 151 ]
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 158 ]
 > 
 > proc.time()
    user  system elapsed 
-  0.470   0.103   0.571 
+  0.507   0.105   0.610 

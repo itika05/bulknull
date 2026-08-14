@@ -7,10 +7,13 @@
 #' @param bulk_beta numeric; effect size estimate from bulk analysis
 #' @param bulk_se numeric; standard error of bulk_beta
 #' @param bulk_fdr numeric; FDR (or p-value) from bulk test
-#' @param sc_zscore numeric; z-score of signal in target single-cell cluster
+#' @param d_sc numeric; standardized effect size in single-cell cluster (primary input)
+#' @param sc_zscore numeric; z-score of signal in target cluster (backward compatibility)
 #' @param cluster_fraction numeric; fraction of total cells in target cluster
 #' @param condition_fraction numeric; fraction of cells in case condition
-#' @param n_cluster numeric; number of cells in target cluster
+#' @param n_cluster numeric; number of cells in target cluster (required if sc_zscore supplied)
+#' @param n_eff_basis character; basis for sc_zscore conversion: "cell" or "donor"
+#' @param n_donors numeric; number of donors (required if n_eff_basis = "donor")
 #' @param null_fdr_threshold numeric; FDR threshold for applicability gate (default 0.05)
 #' @param on_violation character; "error", "warn", or "pass" (default "error")
 #' @param alpha numeric; significance level for DI (default 0.05)
@@ -22,6 +25,7 @@
 #'   \item{dds}{DDS (Dilution Discordance Score) value}
 #'   \item{mu_dilution}{Expected bulk z-score under dilution hypothesis}
 #'   \item{z_bulk}{Observed bulk z-score}
+#'   \item{d_sc}{Standardized effect size used}
 #'   \item{di}{Diagnosability Index value}
 #'   \item{verdict}{Interpretive string (e.g., "Ambiguous")}
 #'   \item{gate_status}{Character indicating whether input passed the gate}
@@ -37,15 +41,14 @@
 #' diagnosability_index() internally for inspection if needed.
 #'
 #' @examples
-#' # Example: DPP9 in M8 myeloid cells from IPF cohort
+#' # Example: DPP9 in M8 (direct d_sc input, recommended)
 #' result <- bulknull(
-#'   bulk_beta = -0.084210,
-#'   bulk_se = 0.062774,
-#'   bulk_fdr = 0.449745,
-#'   sc_zscore = 2.077409,
-#'   cluster_fraction = 1332 / 19175,
+#'   bulk_beta = -0.0297,
+#'   bulk_se = 0.0595,
+#'   bulk_fdr = 0.821,
+#'   d_sc = 0.117962,
+#'   cluster_fraction = 0.0695,
 #'   condition_fraction = 0.631,
-#'   n_cluster = 1332,
 #'   alpha = 0.05,
 #'   sided = "one"
 #' )
@@ -53,13 +56,16 @@
 #' print(result)
 #'
 #' @export
-bulknull <- function(bulk_beta, bulk_se, bulk_fdr, sc_zscore, cluster_fraction,
-                      condition_fraction, n_cluster, null_fdr_threshold = 0.05,
+bulknull <- function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore = NULL,
+                      cluster_fraction, condition_fraction, n_cluster = NULL,
+                      n_eff_basis = c("cell", "donor"), n_donors = NULL,
+                      null_fdr_threshold = 0.05,
                       on_violation = c("error", "warn", "pass"),
                       alpha = 0.05, sided = c("one", "two")) {
 
   on_violation <- match.arg(on_violation)
   sided <- match.arg(sided)
+  n_eff_basis <- match.arg(n_eff_basis)
 
   # Step 1: Check applicability
   applicability <- check_dds_applicability(
@@ -73,10 +79,13 @@ bulknull <- function(bulk_beta, bulk_se, bulk_fdr, sc_zscore, cluster_fraction,
     bulk_beta = bulk_beta,
     bulk_se = bulk_se,
     bulk_fdr = bulk_fdr,
+    d_sc = d_sc,
     sc_zscore = sc_zscore,
     cluster_fraction = cluster_fraction,
     condition_fraction = condition_fraction,
     n_cluster = n_cluster,
+    n_eff_basis = n_eff_basis,
+    n_donors = n_donors,
     null_fdr_threshold = null_fdr_threshold,
     on_violation = on_violation
   )
@@ -129,10 +138,13 @@ bulknull <- function(bulk_beta, bulk_se, bulk_fdr, sc_zscore, cluster_fraction,
         bulk_beta = bulk_beta,
         bulk_se = bulk_se,
         bulk_fdr = bulk_fdr,
+        d_sc = d_sc,
         sc_zscore = sc_zscore,
         cluster_fraction = cluster_fraction,
         condition_fraction = condition_fraction,
-        n_cluster = n_cluster
+        n_cluster = n_cluster,
+        n_eff_basis = n_eff_basis,
+        n_donors = n_donors
       ),
       applicability = list(
         applicable = applicability$applicable,
@@ -141,6 +153,7 @@ bulknull <- function(bulk_beta, bulk_se, bulk_fdr, sc_zscore, cluster_fraction,
       dds = dds_result$dds_score,
       mu_dilution = dds_result$mu_dilution,
       z_bulk = dds_result$z_bulk,
+      d_sc = dds_result$d_sc,
       dds_interpretation = dds_interpretation,
       di = di_result$di,
       di_interpretation = di_interpretation,

@@ -10,7 +10,7 @@
 * checking for file ‘bulknull/DESCRIPTION’ ... OK
 * this is package ‘bulknull’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [2s/16s] NOTE
+* checking CRAN incoming feasibility ... [2s/15s] NOTE
 Maintainer: ‘Itika Arora <itiarora@alfaisal.edu>’
 
 New submission
@@ -48,7 +48,17 @@ New submission
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd line widths ... OK
-* checking Rd cross-references ... OK
+* checking Rd cross-references ... WARNING
+Missing link(s) in Rd file 'dds_bounds.Rd':
+  ‘-1.96, 1.96’
+
+See section 'Cross-references' in the 'Writing R Extensions' manual.
+
+Found the following Rd file(s) with Rd \link{} targets missing package
+anchors:
+  dds_bounds.Rd: -1.96, 1.96
+Please provide package anchors for all Rd \link{} targets not in the
+package itself and the base packages.
 * checking for missing documentation entries ... OK
 * checking for code/documentation mismatches ... OK
 * checking Rd \usage sections ... OK
@@ -75,4 +85,4 @@ release or compiling the source code from <https://www.html-tidy.org/>.
 * checking for non-standard things in the check directory ... OK
 * checking for detritus in the temp directory ... OK
 * DONE
-Status: 2 NOTEs
+Status: 1 WARNING, 2 NOTEs

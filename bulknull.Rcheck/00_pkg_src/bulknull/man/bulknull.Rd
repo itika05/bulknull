@@ -8,10 +8,13 @@ bulknull(
   bulk_beta,
   bulk_se,
   bulk_fdr,
-  sc_zscore,
+  d_sc = NULL,
+  sc_zscore = NULL,
   cluster_fraction,
   condition_fraction,
-  n_cluster,
+  n_cluster = NULL,
+  n_eff_basis = c("cell", "donor"),
+  n_donors = NULL,
   null_fdr_threshold = 0.05,
   on_violation = c("error", "warn", "pass"),
   alpha = 0.05,
@@ -25,13 +28,19 @@ bulknull(
 
 \item{bulk_fdr}{numeric; FDR (or p-value) from bulk test}
 
-\item{sc_zscore}{numeric; z-score of signal in target single-cell cluster}
+\item{d_sc}{numeric; standardized effect size in single-cell cluster (primary input)}
+
+\item{sc_zscore}{numeric; z-score of signal in target cluster (backward compatibility)}
 
 \item{cluster_fraction}{numeric; fraction of total cells in target cluster}
 
 \item{condition_fraction}{numeric; fraction of cells in case condition}
 
-\item{n_cluster}{numeric; number of cells in target cluster}
+\item{n_cluster}{numeric; number of cells in target cluster (required if sc_zscore supplied)}
+
+\item{n_eff_basis}{character; basis for sc_zscore conversion: "cell" or "donor"}
+
+\item{n_donors}{numeric; number of donors (required if n_eff_basis = "donor")}
 
 \item{null_fdr_threshold}{numeric; FDR threshold for applicability gate (default 0.05)}
 
@@ -48,6 +57,7 @@ An S3 object of class "bulknull" containing:
 \item{dds}{DDS (Dilution Discordance Score) value}
 \item{mu_dilution}{Expected bulk z-score under dilution hypothesis}
 \item{z_bulk}{Observed bulk z-score}
+\item{d_sc}{Standardized effect size used}
 \item{di}{Diagnosability Index value}
 \item{verdict}{Interpretive string (e.g., "Ambiguous")}
 \item{gate_status}{Character indicating whether input passed the gate}
@@ -70,15 +80,14 @@ The function preserves the full output of dilution_score() and
 diagnosability_index() internally for inspection if needed.
 }
 \examples{
-# Example: DPP9 in M8 myeloid cells from IPF cohort
+# Example: DPP9 in M8 (direct d_sc input, recommended)
 result <- bulknull(
-  bulk_beta = -0.084210,
-  bulk_se = 0.062774,
-  bulk_fdr = 0.449745,
-  sc_zscore = 2.077409,
-  cluster_fraction = 1332 / 19175,
+  bulk_beta = -0.0297,
+  bulk_se = 0.0595,
+  bulk_fdr = 0.821,
+  d_sc = 0.117962,
+  cluster_fraction = 0.0695,
   condition_fraction = 0.631,
-  n_cluster = 1332,
   alpha = 0.05,
   sided = "one"
 )

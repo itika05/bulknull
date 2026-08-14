@@ -8,14 +8,17 @@
 #'   `gene` (character), `beta` or `log2fc` (numeric effect size),
 #'   `se` or `se_log2fc` (numeric standard error), and `fdr` or `padj`
 #'   (numeric FDR). Additional columns are ignored.
-#' @param sc_zscores named numeric vector; z-scores keyed by gene name.
-#'   Genes not in this vector are skipped with a note.
+#' @param d_sc_values named numeric vector; standardized effect sizes keyed by gene (primary input)
+#' @param sc_zscores named numeric vector; z-scores keyed by gene (backward compatibility).
+#'   Genes not in either vector are skipped with a note.
 #' @param cluster_fraction numeric; fraction of total cells in target cluster
 #'   (constant across all genes).
 #' @param condition_fraction numeric; fraction of cells in case condition
 #'   (constant across all genes).
 #' @param n_cluster numeric; number of cells in target cluster
-#'   (constant across all genes).
+#'   (constant across all genes). Required if sc_zscores supplied.
+#' @param n_eff_basis character; "cell" or "donor" basis for z-score conversion.
+#' @param n_donors numeric; number of donors (required if n_eff_basis = "donor").
 #' @param null_fdr_threshold numeric; FDR threshold for applicability gate
 #'   (default 0.05). Genes with FDR <= threshold are marked "FAILED".
 #' @param alpha numeric; significance level for DI (default 0.05).
@@ -65,12 +68,19 @@
 #' print(result)
 #'
 #' @export
-dilution_scan <- function(bulk_deg, sc_zscores, cluster_fraction,
-                          condition_fraction, n_cluster,
+dilution_scan <- function(bulk_deg, d_sc_values = NULL, sc_zscores = NULL,
+                          cluster_fraction, condition_fraction, n_cluster = NULL,
+                          n_eff_basis = c("cell", "donor"), n_donors = NULL,
                           null_fdr_threshold = 0.05, alpha = 0.05,
                           sided = c("one", "two")) {
 
   sided <- match.arg(sided)
+  n_eff_basis <- match.arg(n_eff_basis)
+
+  # Validate input
+  if (is.null(d_sc_values) && is.null(sc_zscores)) {
+    stop("Must supply either d_sc_values or sc_zscores")
+  }
 
   # Identify column names (flexible naming for FDR, effect size, SE)
   fdr_col <- if ("fdr" %in% names(bulk_deg)) "fdr" else if ("padj" %in% names(bulk_deg)) "padj" else stop("bulk_deg must have 'fdr' or 'padj' column")
@@ -87,41 +97,48 @@ dilution_scan <- function(bulk_deg, sc_zscores, cluster_fraction,
     se <- bulk_deg[[i, se_col]]
     fdr <- bulk_deg[[i, fdr_col]]
 
-    # Check for missing single-cell z-score
-    if (!(gene %in% names(sc_zscores)) || is.na(sc_zscores[[gene]])) {
+    # Get d_sc or sc_zscore (d_sc takes priority)
+    d_sc <- NULL
+    sc_zscore <- NULL
+
+    if (!is.null(d_sc_values) && gene %in% names(d_sc_values) && !is.na(d_sc_values[[gene]])) {
+      d_sc <- d_sc_values[[gene]]
+    } else if (!is.null(sc_zscores) && gene %in% names(sc_zscores) && !is.na(sc_zscores[[gene]])) {
+      sc_zscore <- sc_zscores[[gene]]
+    } else {
       results[[i]] <- list(
         gene = gene,
         bulk_beta = beta,
         bulk_se = se,
         bulk_fdr = fdr,
         sc_zscore = NA,
+        d_sc = NA,
         mu_dilution = NA,
         dds = NA,
         di = NA,
-        dds_interpretation = "SKIPPED (missing z-score)",
-        di_interpretation = "SKIPPED (missing z-score)",
-        verdict = "SKIPPED: Single-cell z-score not provided",
+        dds_interpretation = "SKIPPED (missing d_sc/z-score)",
+        di_interpretation = "SKIPPED (missing d_sc/z-score)",
+        verdict = "SKIPPED: Single-cell values not provided",
         gate_status = "SKIPPED"
       )
       next
     }
 
-    sc_zscore <- sc_zscores[[gene]]
-
-    # Check for zero-variance single-cell signal
-    if (sc_zscore == 0) {
+    # Check for zero signal
+    if ((!is.null(sc_zscore) && sc_zscore == 0) || (!is.null(d_sc) && d_sc == 0)) {
       results[[i]] <- list(
         gene = gene,
         bulk_beta = beta,
         bulk_se = se,
         bulk_fdr = fdr,
         sc_zscore = sc_zscore,
+        d_sc = d_sc,
         mu_dilution = NA,
         dds = NA,
         di = NA,
-        dds_interpretation = "SKIPPED (zero z-score)",
-        di_interpretation = "SKIPPED (zero z-score)",
-        verdict = "SKIPPED: Zero z-score (no single-cell signal)",
+        dds_interpretation = "SKIPPED (zero signal)",
+        di_interpretation = "SKIPPED (zero signal)",
+        verdict = "SKIPPED: Zero single-cell signal",
         gate_status = "SKIPPED"
       )
       next
@@ -133,10 +150,13 @@ dilution_scan <- function(bulk_deg, sc_zscores, cluster_fraction,
         bulk_beta = beta,
         bulk_se = se,
         bulk_fdr = fdr,
+        d_sc = d_sc,
         sc_zscore = sc_zscore,
         cluster_fraction = cluster_fraction,
         condition_fraction = condition_fraction,
         n_cluster = n_cluster,
+        n_eff_basis = n_eff_basis,
+        n_donors = n_donors,
         null_fdr_threshold = null_fdr_threshold,
         on_violation = "pass",
         alpha = alpha,
@@ -149,6 +169,7 @@ dilution_scan <- function(bulk_deg, sc_zscores, cluster_fraction,
         bulk_se = se,
         bulk_fdr = fdr,
         sc_zscore = sc_zscore,
+        d_sc = bulknull_result$d_sc,
         mu_dilution = bulknull_result$mu_dilution,
         dds = bulknull_result$dds,
         di = bulknull_result$di,
@@ -164,6 +185,7 @@ dilution_scan <- function(bulk_deg, sc_zscores, cluster_fraction,
         bulk_se = se,
         bulk_fdr = fdr,
         sc_zscore = sc_zscore,
+        d_sc = d_sc,
         mu_dilution = NA,
         dds = NA,
         di = NA,
@@ -175,6 +197,35 @@ dilution_scan <- function(bulk_deg, sc_zscores, cluster_fraction,
     })
   }
 
-  # Convert to data frame
-  do.call(rbind, lapply(results, as.data.frame))
+  # Convert to data frame (build by column to handle NULL values correctly)
+  if (length(results) == 0) {
+    return(data.frame())
+  }
+
+  # Helper function to extract value, handling NULL -> NA
+  extract_with_na <- function(lst, key) {
+    vapply(lst, function(x) {
+      val <- x[[key]]
+      if (is.null(val)) NA else val
+    }, FUN.VALUE = numeric(1), USE.NAMES = FALSE)
+  }
+
+  # Extract columns from all results
+  data.frame(
+    gene = sapply(results, "[[", "gene"),
+    bulk_beta = extract_with_na(results, "bulk_beta"),
+    bulk_se = extract_with_na(results, "bulk_se"),
+    bulk_fdr = extract_with_na(results, "bulk_fdr"),
+    sc_zscore = extract_with_na(results, "sc_zscore"),
+    d_sc = extract_with_na(results, "d_sc"),
+    mu_dilution = extract_with_na(results, "mu_dilution"),
+    dds = extract_with_na(results, "dds"),
+    di = extract_with_na(results, "di"),
+    dds_interpretation = sapply(results, "[[", "dds_interpretation"),
+    di_interpretation = sapply(results, "[[", "di_interpretation"),
+    verdict = sapply(results, "[[", "verdict"),
+    gate_status = sapply(results, "[[", "gate_status"),
+    row.names = NULL,
+    stringsAsFactors = FALSE
+  )
 }

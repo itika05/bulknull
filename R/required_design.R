@@ -5,9 +5,12 @@
 #' bulk_se) or bulk_se (at fixed cluster_fraction).
 #'
 #' @param target_di numeric; target diagnosability index (0 to 1)
-#' @param sc_zscore numeric; single-cell z-score for the signal
+#' @param d_sc numeric; standardized effect size in single-cell cluster (primary input)
+#' @param sc_zscore numeric; single-cell z-score (backward compatibility)
 #' @param condition_fraction numeric; fraction of cells in case condition (0 to 1)
-#' @param n_cluster numeric; number of cells in target cluster
+#' @param n_cluster numeric; number of cells in target cluster (required if sc_zscore supplied)
+#' @param n_eff_basis character; basis for conversion: "cell" or "donor"
+#' @param n_donors numeric; number of donors (required if n_eff_basis = "donor")
 #' @param cluster_fraction numeric; fraction of total cells in target cluster
 #' @param bulk_se numeric; standard error of bulk effect estimate
 #' @param alpha numeric; significance level (default 0.05)
@@ -52,11 +55,42 @@
 #' print(design)
 #'
 #' @export
-required_design <- function(target_di, sc_zscore, condition_fraction, n_cluster,
+required_design <- function(target_di, d_sc = NULL, sc_zscore = NULL,
+                             condition_fraction, n_cluster = NULL,
+                             n_eff_basis = c("cell", "donor"), n_donors = NULL,
                              cluster_fraction, bulk_se, alpha = 0.05,
                              sided = c("one", "two")) {
 
   sided <- match.arg(sided)
+  n_eff_basis <- match.arg(n_eff_basis)
+
+  # Handle d_sc vs sc_zscore: d_sc takes priority
+  if (!is.null(d_sc) && !is.null(sc_zscore)) {
+    warning("Both d_sc and sc_zscore supplied; using d_sc and ignoring sc_zscore")
+  }
+
+  if (is.null(d_sc)) {
+    # Convert sc_zscore to d_sc
+    if (is.null(sc_zscore)) {
+      stop("Must supply either d_sc or sc_zscore")
+    }
+
+    if (n_eff_basis == "cell") {
+      if (is.null(n_cluster)) {
+        stop("n_cluster required when n_eff_basis = 'cell'")
+      }
+      if (n_cluster < 1) stop("n_cluster must be >= 1")
+      n_eff_sc <- condition_fraction * (1 - condition_fraction) * n_cluster
+      d_sc <- sc_zscore / sqrt(n_eff_sc)
+    } else if (n_eff_basis == "donor") {
+      if (is.null(n_donors)) {
+        stop("n_donors required when n_eff_basis = 'donor'")
+      }
+      if (n_donors < 2) stop("n_donors must be >= 2")
+      n_eff_sc <- condition_fraction * (1 - condition_fraction) * n_donors
+      d_sc <- sc_zscore / sqrt(n_eff_sc)
+    }
+  }
 
   # Compute z_critical
   if (sided == "one") {
@@ -69,12 +103,6 @@ required_design <- function(target_di, sc_zscore, condition_fraction, n_cluster,
   # DI = Normal_CDF(mu - z_critical)
   # mu = Normal_CDF_inverse(DI) + z_critical = qnorm(DI) + z_critical
   mu_dilution_required <- stats::qnorm(target_di) + z_critical
-
-  # Compute n_eff_sc from condition_fraction and n_cluster
-  n_eff_sc <- condition_fraction * (1 - condition_fraction) * n_cluster
-
-  # Compute d_sc from single-cell z-score
-  d_sc <- sc_zscore / sqrt(n_eff_sc)
 
   # Scenario 1: Solve for cluster_fraction at fixed bulk_se
   # μ = (cluster_frac * d_sc) / bulk_se

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.8.14)  14 AUG 2026 23:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.8.14)  14 AUG 2026 23:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -290,7 +290,7 @@ File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 ) (/Users/dritikaarora/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2026-07-20 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count316
-) (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpmR7621/Rd2pdf15fd47e514b42/Rd2.aux)
+) (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpMlVKMp/Rd2pdfd84a98d1a8/Rd2.aux)
 \openout1 = `Rd2.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 8.
@@ -312,7 +312,7 @@ LaTeX Font Info:    ... okay on input line 8.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 8.
 LaTeX Font Info:    ... okay on input line 8.
 Package hyperref Info: Link coloring ON on input line 8.
- (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpmR7621/Rd2pdf15fd47e514b42/Rd2.out) (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpmR7621/Rd2pdf15fd47e514b42/Rd2.out)
+ (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpMlVKMp/Rd2pdfd84a98d1a8/Rd2.out) (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpMlVKMp/Rd2pdfd84a98d1a8/Rd2.out)
 \@outlinefile=\write4
 \openout4 = `Rd2.out'.
 
@@ -322,7 +322,7 @@ File: t1zi4.fd 2018/01/14 T1/zi4 (Inconsolata)
 )
 LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
 (Font)              scaled to size 10.0pt on input line 41.
- (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpmR7621/Rd2pdf15fd47e514b42/Rd2.toc
+ (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpMlVKMp/Rd2pdfd84a98d1a8/Rd2.toc
 LaTeX Font Info:    Trying to load font information for U+msa on input line 1.
  (/Users/dritikaarora/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
@@ -330,54 +330,58 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 LaTeX Font Info:    Trying to load font information for U+msb on input line 1.
  (/Users/dritikaarora/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-))
+) [1
+
+
+{/Users/dritikaarora/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}{/Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-0.enc}])
 \tf@toc=\write5
 \openout5 = `Rd2.toc'.
 
- [1
-
-
-{/Users/dritikaarora/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}{/Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-0.enc}] [2]
+ [2]
 LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
-(Font)              scaled to size 9.0pt on input line 127.
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 156.
+(Font)              scaled to size 9.0pt on input line 137.
+ [3]
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 165.
  (/Users/dritikaarora/Library/TinyTeX/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-) [3] [4]
-Overfull \hbox (13.31606pt too wide) in paragraph at lines 254--256
+) [4] [5] [6] [7] [8]
+Overfull \hbox (13.31606pt too wide) in paragraph at lines 486--488
 []\T1/ptm/m/n/10 Rationale: Di-lu-tion al-ter-na-tive is di-rec-tional by con-struc-tion (sign(mu_dilution) = sign(sc_zscore)
  []
 
-[5] [6] [7] [8] [9]
-LaTeX Font Info:    Trying to load font information for TS1+zi4 on input line 574.
+[9] [10] [11] [12] [13] [14]
+LaTeX Font Info:    Trying to load font information for TS1+zi4 on input line 838.
  (/Users/dritikaarora/Library/TinyTeX/texmf-dist/tex/latex/inconsolata/ts1zi4.fd
 File: ts1zi4.fd 2018/01/14 TS1/zi4 (Inconsolata)
 )
 LaTeX Font Info:    Font shape `TS1/zi4/m/n' will be
-(Font)              scaled to size 10.0pt on input line 574.
- [10] [11{/Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/enc/dvips/inconsolata/i4-ts1.enc}] [12] [13]
+(Font)              scaled to size 10.0pt on input line 838.
+ [15{/Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/enc/dvips/inconsolata/i4-ts1.enc}] [16] [17] [18]
 No file Rd2.ind.
-[14] (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpmR7621/Rd2pdf15fd47e514b42/Rd2.aux)
+[19] (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpMlVKMp/Rd2pdfd84a98d1a8/Rd2.aux)
  ***********
 LaTeX2e <2026-06-01>
 L3 programming layer <2026-07-20>
  ***********
 Package rerunfilecheck Info: File `Rd2.out' has not changed.
-(rerunfilecheck)             Checksum: 141C023A430167D7AF6BE5CAEA97F78A;1482.
+(rerunfilecheck)             Checksum: 88CECC91D4D1EFCA1DDB3F9B1AB7FCEE;2226.
  ) 
 Here is how much of TeX's memory you used:
- 10443 strings out of 469149
- 161013 string characters out of 5458697
+ 10488 strings out of 469149
+ 161705 string characters out of 5458697
  574652 words of memory out of 5000000
- 39199 multiletter control sequences out of 15000+600000
+ 39204 multiletter control sequences out of 15000+600000
  660275 words of font info for 80 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 91i,5n,95p,267b,778s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 91i,6n,95p,267b,780s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+pdfTeX warning (dest): name{Rfn..Rdash.1.96,\0401.96} has been referenced but does not exist, replaced by a fixed one
+
 </Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/type1/public/inconsolata/Inconsolata-zi4r.pfb></Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Rd2.pdf (14 pages, 109176 bytes).
+Output written on Rd2.pdf (19 pages, 119100 bytes).
 PDF statistics:
- 248 PDF objects out of 1000 (max. 8388607)
- 218 compressed objects within 3 object streams
- 97 named destinations out of 1000 (max. 500000)
- 89 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 332 PDF objects out of 1000 (max. 8388607)
+ 297 compressed objects within 3 object streams
+ 137 named destinations out of 1000 (max. 500000)
+ 129 words of extra memory for PDF output out of 10000 (max. 10000000)
 

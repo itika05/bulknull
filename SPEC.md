@@ -622,4 +622,166 @@ bulk_se_required <- 0.008198 / 1.644854 = 0.0049818
 
 ---
 
+## EXTENSION: d_sc as Primary Argument + Three New Functions (2026-08-14)
+
+### Rationale for Change
+
+The conversion `d_sc = sc_zscore / sqrt(n_eff)` is the package's most exposed choice. The n_eff basis (cell vs. donor level) dramatically changes all headline numbers:
+
+| Basis | d_sc | mu | DI | DI 0.8 Attainable? |
+|-------|------|-----|-----|---|
+| cell-level (1332 cells) | 0.118 | 0.131 | 0.065 | NO |
+| donor-level (18 donors) | 1.015 | 1.123 | 0.301 | YES at f=0.154 |
+
+**Decision:** Make d_sc a first-class supplied argument to prevent hidden assumptions. Keep sc_zscore for backward compatibility with explicit warning about n_eff basis.
+
+### TASK 1: d_sc as Primary Input
+
+**Functions Modified:** `dilution_score()`, `bulknull()`, `required_design()`, `dilution_scan()`
+
+**New Arguments:**
+- `d_sc`: numeric, standardized effect size (primary input, no conversion)
+- `sc_zscore`: numeric, z-score (backward compatibility, demoted)
+- `n_eff_basis`: character, "cell" or "donor" for conversion basis
+- `n_donors`: numeric, required if n_eff_basis = "donor"
+
+**Behavior:**
+- If d_sc supplied: use directly, ignore sc_zscore with warning if both given
+- If only sc_zscore supplied: convert using n_eff_basis; warn about basis choice
+- If neither supplied: error
+
+**Regression Tests (tolerance 1e-6 unless stated):**
+
+Test 1 (d_sc direct):
+```
+d_sc = 0.117962
+-> mu = 0.130536 ✓
+-> DI = 0.064973 ✓
+```
+
+Test 2 (sc_zscore, cell basis):
+```
+sc_zscore = 2.077409, n_cluster = 1332, condition_fraction = 0.631
+-> d_sc = 0.117962 ✓
+-> mu = 0.130536 ✓
+-> DI = 0.064973 ✓
+```
+
+Test 3 (sc_zscore, donor basis, tolerance 1e-4):
+```
+sc_zscore = 2.077409, n_donors = 18, condition_fraction = 0.631
+-> d_sc = 1.014700 ✓
+-> mu = 1.122900 ✓
+-> DI = 0.300900 ✓
+```
+
+---
+
+### TASK 2: critical_precision()
+
+**Signature:**
+```r
+critical_precision(d_sc, bulk_se, target_di = 0.8, alpha = 0.05, sided = c("one", "two"))
+```
+
+**Returns:** List with elements:
+- `mu_required`: Effect size needed to achieve target DI
+- `s_critical`: Critical bulk SE; target attainable iff bulk_se <= s_critical
+- `attainable`: Logical; TRUE if target DI is achievable at current bulk_se
+- `min_detectable_d`: Smallest within-cluster effect reachable at f=1.0
+- `f_required_at_d(d)`: Function returning required cluster fraction for effect d
+
+**Rationale:** Target DI attainable at some f <= 1 if and only if
+```
+bulk_se <= d_sc / (z_critical + qnorm(target_di))
+```
+This formula is independent of cohort size N; depends only on statistical threshold and effect scale.
+
+**Regression Tests:**
+```
+d_sc = 0.117962, bulk_se = 0.062774, alpha = 0.05, one-sided
+
+target = 0.3:
+  mu_required = 1.120453 ✓
+  s_critical = 0.105281 ✓
+  min_detectable_d = 0.070335 ✓
+  f_required_at_d(0.8) = 0.087919 ✓
+  attainable = TRUE ✓
+
+target = 0.5:
+  mu_required = 1.644854 ✓
+  s_critical = 0.071716 ✓
+  min_detectable_d = 0.103254 ✓
+  f_required_at_d(0.8) = 0.129068 ✓
+  attainable = FALSE ✓
+
+target = 0.8:
+  mu_required = 2.486475 ✓
+  s_critical = 0.047441 ✓
+  min_detectable_d = 0.156086 ✓
+  f_required_at_d(0.8) = 0.195107 ✓
+  attainable = FALSE ✓
+```
+
+---
+
+### TASK 3: cohort_inflation()
+
+**Signature:**
+```r
+cohort_inflation(mu_observed, target_di = 0.8, alpha = 0.05, sided = c("one", "two"))
+```
+
+**Returns:** Numeric scalar; required inflation in cohort size
+
+**Identity:** `inflation = (mu_required / mu_observed)^2`
+
+**Rationale:** This relationship is independent of pooled cohort size N and bulk point estimate; depends only on observed and required effect sizes. Since SE ~ 1/sqrt(N), a factor k reduction in SE requires N to increase k^2-fold.
+
+**Regression Tests:**
+```
+mu_observed = 0.130536, alpha = 0.05, one-sided
+
+target = 0.8:
+  inflation = 362.8336 ✓ (tolerance 1e-3)
+  Interpretation: cohort must grow 362.8x; if N=630, new N ~ 228,585
+
+target = 0.5:
+  inflation = 158.79 ✓ (tolerance 1e-2)
+  Interpretation: cohort must grow 158.8x; if N=630, new N ~ 100,031
+```
+
+---
+
+### TASK 4: dds_bounds()
+
+**Signature:**
+```r
+dds_bounds(mu, bulk_se = NULL, z_lo = -1.96, z_hi = 1.96)
+```
+
+**Returns:** List with elements:
+- `lower`: Minimum attainable DDS over z range
+- `upper`: Maximum attainable DDS over z range
+- `width`: Upper - lower
+- `reaches_0.7`: Logical; TRUE if upper >= 0.7
+- `reaches_0.9`: Logical; TRUE if upper >= 0.9
+
+**Formula:** `DDS(z) = plogis(mu * z - mu^2/2)` where plogis is logistic CDF
+
+**Rationale:** For fixed mu (effect size), as bulk z-score varies over a range (typically [-1.96, 1.96]), the DDS traces an interval. A narrow interval means constrained outcome; a wide interval means uncertain result.
+
+**Regression Tests:**
+```
+mu = 0.130536, z_lo = -1.96, z_hi = 1.96
+
+lower = 0.434290 ✓
+upper = 0.561519 ✓
+width = 0.127229 ✓
+reaches_0.7 = FALSE ✓
+reaches_0.9 = FALSE ✓
+```
+
+---
+
 END OF SPEC.md

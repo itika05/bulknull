@@ -30,15 +30,14 @@ base::assign(".ptime", proc.time(), pos = "CheckExEnv")
 
 ### ** Examples
 
-# Example: DPP9 in M8 myeloid cells from IPF cohort
+# Example: DPP9 in M8 (direct d_sc input, recommended)
 result <- bulknull(
-  bulk_beta = -0.084210,
-  bulk_se = 0.062774,
-  bulk_fdr = 0.449745,
-  sc_zscore = 2.077409,
-  cluster_fraction = 1332 / 19175,
+  bulk_beta = -0.0297,
+  bulk_se = 0.0595,
+  bulk_fdr = 0.821,
+  d_sc = 0.117962,
+  cluster_fraction = 0.0695,
   condition_fraction = 0.631,
-  n_cluster = 1332,
   alpha = 0.05,
   sided = "one"
 )
@@ -76,6 +75,92 @@ check_dds_applicability(bulk_fdr = 0.001, null_fdr_threshold = 0.05,
 
 base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
 base::cat("check_dds_applicability", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("cohort_inflation")
+### * cohort_inflation
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: cohort_inflation
+### Title: Cohort Inflation Factor for Target Diagnosability Index
+### Aliases: cohort_inflation
+
+### ** Examples
+
+inflation <- cohort_inflation(
+  mu_observed = 0.130536,
+  target_di = 0.8,
+  alpha = 0.05,
+  sided = "one"
+)
+
+cat("Required inflation:", inflation, "x\n")
+cat("If current N=630, new N would be:", 630 * inflation, "\n")
+
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("cohort_inflation", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("critical_precision")
+### * critical_precision
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: critical_precision
+### Title: Critical Precision for Target Diagnosability Index
+### Aliases: critical_precision
+
+### ** Examples
+
+result <- critical_precision(
+  d_sc = 0.117962,
+  bulk_se = 0.062774,
+  target_di = 0.8,
+  alpha = 0.05,
+  sided = "one"
+)
+
+print(result$attainable)  # FALSE: bulk_se exceeds s_critical
+print(result$min_detectable_d)
+
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("critical_precision", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("dds_bounds")
+### * dds_bounds
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: dds_bounds
+### Title: DDS Bounds Over Bulk Z-Score Range
+### Aliases: dds_bounds
+
+### ** Examples
+
+bounds <- dds_bounds(
+  mu = 0.130536,
+  bulk_se = 0.062774,
+  z_lo = -1.96,
+  z_hi = 1.96
+)
+
+cat("DDS range:", bounds$lower, "to", bounds$upper, "\n")
+cat("Interval width:", bounds$width, "\n")
+cat("Reaches strong evidence (0.7)?", bounds$reaches_0.7, "\n")
+
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("dds_bounds", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
 cleanEx()
 nameEx("diagnosability_index")
 ### * diagnosability_index
@@ -147,15 +232,26 @@ base::assign(".ptime", proc.time(), pos = "CheckExEnv")
 
 ### ** Examples
 
-# DPP9 in M8 (IPF inflammasome macrophages)
+# Direct d_sc input (recommended)
+dilution_score(
+  bulk_beta = -0.0297,
+  bulk_se = 0.0595,
+  bulk_fdr = 0.821,
+  d_sc = 0.117962,
+  cluster_fraction = 0.0695,
+  condition_fraction = 0.631
+)
+
+# Backward compatible: sc_zscore with cell-level basis
 dilution_score(
   bulk_beta = -0.0297,
   bulk_se = 0.0595,
   bulk_fdr = 0.821,
   sc_zscore = 2.077,
-  cluster_fraction = 1332 / 19175,
+  cluster_fraction = 0.0695,
   condition_fraction = 0.631,
-  n_cluster = 1332
+  n_cluster = 1332,
+  n_eff_basis = "cell"
 )
 
 

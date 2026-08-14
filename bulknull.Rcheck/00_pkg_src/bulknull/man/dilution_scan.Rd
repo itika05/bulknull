@@ -6,10 +6,13 @@
 \usage{
 dilution_scan(
   bulk_deg,
-  sc_zscores,
+  d_sc_values = NULL,
+  sc_zscores = NULL,
   cluster_fraction,
   condition_fraction,
-  n_cluster,
+  n_cluster = NULL,
+  n_eff_basis = c("cell", "donor"),
+  n_donors = NULL,
   null_fdr_threshold = 0.05,
   alpha = 0.05,
   sided = c("one", "two")
@@ -21,8 +24,10 @@ dilution_scan(
 \code{se} or \code{se_log2fc} (numeric standard error), and \code{fdr} or \code{padj}
 (numeric FDR). Additional columns are ignored.}
 
-\item{sc_zscores}{named numeric vector; z-scores keyed by gene name.
-Genes not in this vector are skipped with a note.}
+\item{d_sc_values}{named numeric vector; standardized effect sizes keyed by gene (primary input)}
+
+\item{sc_zscores}{named numeric vector; z-scores keyed by gene (backward compatibility).
+Genes not in either vector are skipped with a note.}
 
 \item{cluster_fraction}{numeric; fraction of total cells in target cluster
 (constant across all genes).}
@@ -31,7 +36,11 @@ Genes not in this vector are skipped with a note.}
 (constant across all genes).}
 
 \item{n_cluster}{numeric; number of cells in target cluster
-(constant across all genes).}
+(constant across all genes). Required if sc_zscores supplied.}
+
+\item{n_eff_basis}{character; "cell" or "donor" basis for z-score conversion.}
+
+\item{n_donors}{numeric; number of donors (required if n_eff_basis = "donor").}
 
 \item{null_fdr_threshold}{numeric; FDR threshold for applicability gate
 (default 0.05). Genes with FDR <= threshold are marked "FAILED".}

@@ -1,11 +1,16 @@
 bulknull	bulknull
 check_dds_applicability	check_dds_applicability
+cohort_inflation	cohort_inflation
+critical_precision	critical_precision
+dds_bounds	dds_bounds
 diagnosability_index	diagnosability_index
 dilution_scan	dilution_scan
 dilution_score	dilution_score
 dpp9_m8	dpp9_m8
 plot.bulknull	plot.bulknull
 print.bulknull	print.bulknull
+print.critical_precision	print.critical_precision
+print.dds_bounds	print.dds_bounds
 print.required_design	print.required_design
 required_design	required_design
 summary.bulknull	summary.bulknull

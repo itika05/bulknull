@@ -2,12 +2,20 @@ bulknull                One-Call Wrapper for Bulk-Null Dilution
                         Diagnostics
 check_dds_applicability
                         Check DDS Applicability: Bulk Must Be Null
+cohort_inflation        Cohort Inflation Factor for Target
+                        Diagnosability Index
+critical_precision      Critical Precision for Target Diagnosability
+                        Index
+dds_bounds              DDS Bounds Over Bulk Z-Score Range
 diagnosability_index    Diagnosability Index (DI)
 dilution_scan           Vectorized Dilution Scan Across Multiple Genes
 dilution_score          Dilution Discordance Score (DDS)
 dpp9_m8                 DPP9/M8 Example Dataset
 plot.bulknull           Plot DI Landscape for Study Design
 print.bulknull          Print method for bulknull objects
+print.critical_precision
+                        Print method for critical_precision objects
+print.dds_bounds        Print method for dds_bounds objects
 print.required_design   Print method for required_design objects
 required_design         Required Study Design to Achieve Target
                         Diagnosability Index
