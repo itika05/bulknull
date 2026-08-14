@@ -10,7 +10,7 @@
 * checking for file ‘bulknull/DESCRIPTION’ ... OK
 * this is package ‘bulknull’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [2s/15s] NOTE
+* checking CRAN incoming feasibility ... [2s/16s] NOTE
 Maintainer: ‘Itika Arora <itiarora@alfaisal.edu>’
 
 New submission
@@ -28,10 +28,7 @@ New submission
 * checking for future file timestamps ... OK
 * checking ‘build’ directory ... OK
 * checking DESCRIPTION meta-information ... OK
-* checking top-level files ... NOTE
-File
-  LICENSE
-is not mentioned in the DESCRIPTION file.
+* checking top-level files ... OK
 * checking for left-over files ... OK
 * checking index information ... OK
 * checking package subdirectories ... OK
@@ -78,4 +75,4 @@ release or compiling the source code from <https://www.html-tidy.org/>.
 * checking for non-standard things in the check directory ... OK
 * checking for detritus in the temp directory ... OK
 * DONE
-Status: 3 NOTEs
+Status: 2 NOTEs

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.8.14)  14 AUG 2026 22:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.8.14)  14 AUG 2026 23:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -290,7 +290,7 @@ File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 ) (/Users/dritikaarora/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2026-07-20 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count316
-) (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/Rtmp9hVMT6/Rd2pdf14df16939a1ca/Rd2.aux)
+) (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpmR7621/Rd2pdf15fd47e514b42/Rd2.aux)
 \openout1 = `Rd2.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 8.
@@ -312,7 +312,7 @@ LaTeX Font Info:    ... okay on input line 8.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 8.
 LaTeX Font Info:    ... okay on input line 8.
 Package hyperref Info: Link coloring ON on input line 8.
- (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/Rtmp9hVMT6/Rd2pdf14df16939a1ca/Rd2.out) (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/Rtmp9hVMT6/Rd2pdf14df16939a1ca/Rd2.out)
+ (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpmR7621/Rd2pdf15fd47e514b42/Rd2.out) (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpmR7621/Rd2pdf15fd47e514b42/Rd2.out)
 \@outlinefile=\write4
 \openout4 = `Rd2.out'.
 
@@ -322,7 +322,7 @@ File: t1zi4.fd 2018/01/14 T1/zi4 (Inconsolata)
 )
 LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
 (Font)              scaled to size 10.0pt on input line 41.
- (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/Rtmp9hVMT6/Rd2pdf14df16939a1ca/Rd2.toc
+ (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpmR7621/Rd2pdf15fd47e514b42/Rd2.toc
 LaTeX Font Info:    Trying to load font information for U+msa on input line 1.
  (/Users/dritikaarora/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
@@ -357,7 +357,7 @@ LaTeX Font Info:    Font shape `TS1/zi4/m/n' will be
 (Font)              scaled to size 10.0pt on input line 574.
  [10] [11{/Users/dritikaarora/Library/TinyTeX/texmf-dist/fonts/enc/dvips/inconsolata/i4-ts1.enc}] [12] [13]
 No file Rd2.ind.
-[14] (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/Rtmp9hVMT6/Rd2pdf14df16939a1ca/Rd2.aux)
+[14] (/private/var/folders/47/g3y2zmf53kvcj7q0xyt4f33m0000gn/T/RtmpmR7621/Rd2pdf15fd47e514b42/Rd2.aux)
  ***********
 LaTeX2e <2026-06-01>
 L3 programming layer <2026-07-20>
