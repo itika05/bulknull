@@ -10,3 +10,6 @@
 ^APPLICATION_NOTE\.md$
 ^SPEC\.md$
 ^ISSUES\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

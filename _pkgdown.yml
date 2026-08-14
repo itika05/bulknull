@@ -1,0 +1,37 @@
+url: ~
+template:
+  bootstrap: 5
+
+navbar:
+  title: "bulknull"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Reference"
+      href: reference/index.html
+    - text: "Vignettes"
+      href: articles/index.html
+    - text: "News"
+      href: news/index.html
+  right:
+    - icon: fa-github
+      href: https://github.com/dritikaarora/bulknull
+
+articles:
+  - title: "Getting Started"
+    navbar: ~
+    contents:
+      - bulknull-intro
+  - title: "Design & Interpretation"
+    navbar: ~
+    contents:
+      - low-diagnosability
+
+home:
+  title: bulknull — Post-Hoc Diagnostic for Dilution in Cell-Type-Specific Expression
+  description: Bayesian framework for distinguishing dilution from true absence of effect in bulk-level null results
+  links:
+    - text: GitHub
+      href: https://github.com/dritikaarora/bulknull
+    - text: Report a bug
+      href: https://github.com/dritikaarora/bulknull/issues
