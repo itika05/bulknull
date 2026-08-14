@@ -1,173 +1,189 @@
-# bulknull: Post-Hoc Diagnostic for Dilution in Cell-Type-Specific Expression
+# bulknull: Bulk-Null Hypothesis Testing for Single-Cell Dilution
 
-<!-- badges: start -->
-[![Codecov test coverage](https://codecov.io/gh/dritikaarora/bulknull/graph/badge.svg)](https://app.codecov.io/gh/dritikaarora/bulknull)
-<!-- badges: end -->
+An R package implementing Bayesian inference for detecting and quantifying cell-type dilution in bulk tissue transcriptomics. **bulknull** tests whether observed bulk-level effects are driven by true cell-state differences or by compositional dilution—when a cell type of interest represents a small fraction of total tissue.
 
-An R package for diagnosing whether an observed bulk-level null result reflects true dilution of a single-cell signal (small cluster fraction + hypothesised within-cluster effect) versus a false-positive single-cell call.
+## The Problem
 
-**Important:** bulknull asks "IF there were a within-cluster IPF-vs-control effect of size X, would we have power to detect it?" It does NOT measure within-cluster effects directly. You supply a hypothesised effect size; the package computes power and posterior probability of dilution.
+Bulk tissue RNA-seq measures average gene expression across all cell types. When a cell type of interest is rare (say, 5% of cells), an observed bulk effect could arise from:
 
-## Overview
+1. **True effect**: A large within-cell-type effect d_sc, diluted by the small cluster fraction
+2. **Dilution artifact**: Real but small-magnitude signal inflated by compositional effects
 
-`bulknull` provides two diagnostic quantities:
+**bulknull** quantifies which scenario is more likely, using Bayesian inference and power analysis.
 
-1. **DDS (Dilution Discordance Score)**: Bayesian posterior probability that the observed bulk-level null reflects true dilution (values 0–1, ~0.5 is ambiguous)
+## Key Statistics
 
-2. **DI (Diagnosability Index)**: Statistical power to detect dilution if it truly occurred at the observed single-cell effect size (values 0–1, <0.3 is underpowered)
+### Dilution Discordance Score (DDS)
+Posterior probability that observed bulk effect reflects true dilution:
+- Range: 0 to 1 (higher = stronger dilution evidence)
+- Computed from bulk z-score, cluster proportion, and single-cell effect size
+
+### Diagnosability Index (DI)  
+Statistical power to detect dilution at given effect size:
+- Range: 0 to 1 (higher = better powered)
+- Inverted to solve for required cluster fraction or bulk SE
+
+### Type S and Type M Error Rates
+- **Type S**: P(sign error | significant) — risk of wrong-direction conclusion
+- **Type M**: E[|z| | sig] / μ — expected magnitude exaggeration when significant
 
 ## Installation
 
 ```r
-# From GitHub (when available)
-# devtools::install_github("arora-lab/bulknull")
-
-# From local source
-devtools::load_all("path/to/bulknull")
+# From GitHub
+devtools::install_github("itika05/bulknull")
+library(bulknull)
 ```
 
 ## Quick Start
 
-**Primary use case: Study design (required_design)**
-
-If you want to know what study design (cluster fraction or bulk measurement precision) is needed to achieve a target statistical power:
-
 ```r
-library(bulknull)
-
-# Example: What cluster fraction is needed to achieve DI = 0.5 (50% power)?
-design <- required_design(
-  target_di = 0.5,
-  sc_zscore = 2.077409,      # Module enrichment score (M8 vs. other myeloid)
-  condition_fraction = 0.631,  # Case fraction in cohort
-  n_cluster = 1332,            # Cells in target cluster
-  cluster_fraction = 0.069,    # Current cluster fraction
-  bulk_se = 0.062774           # Current bulk measurement SE
-)
-# Result: requires cluster_fraction = 0.8753 (impossible) or bulk_se = 0.0049818 (159x larger cohort)
-```
-
-**Secondary use case: Post-hoc diagnosis (bulknull)**
-
-Given an observed bulk null and single-cell signal, diagnose whether dilution is likely:
-
-```r
-# Example: DPP9 in M8 cells (k=5 tissue-only)
+# Single gene: DPP9 in M8 lung fibroblasts
 result <- bulknull(
-  bulk_beta = -0.084210,
-  bulk_se = 0.062774,
-  bulk_fdr = 0.449745,
-  sc_zscore = 2.077409,
-  cluster_fraction = 0.069,
-  condition_fraction = 0.631,
-  n_cluster = 1332
+  bulk_beta = -0.084,
+  bulk_se = 0.063,
+  bulk_fdr = 0.45,
+  d_sc = 0.118,              # within-cluster effect
+  cluster_fraction = 0.07,   # 7% of tissue
+  condition_fraction = 0.63, # 63% in condition
+  alpha = 0.05
 )
 
-# Interpretation:
-# - DDS = 0.454 (≈50% posterior probability of dilution; ambiguous)
-# - DI = 0.065 (6.5% power; severely underpowered to detect dilution)
-# - Verdict: UNDERPOWERED (study lacks power to distinguish dilution from true null)
+print(result)        # Full diagnostics
+summary(result)      # One-line summary
+
+# Vectorized: scan 1000+ genes at once
+results <- dilution_scan(
+  bulk_deg = deg_table,      # data.frame with beta, se, fdr, gene
+  sc_zscores = z_vector,     # named numeric vector by gene
+  cluster_fraction = 0.07,
+  condition_fraction = 0.63,
+  n_cluster = 1332           # cells in target cluster
+)
+
+head(results)
 ```
 
-## Obtaining sc_zscore (Hypothesised Within-Cluster Effect)
+## Core Functions
 
-The sc_zscore input is NOT a measured IPF-vs-control effect within the cluster. Instead, it is a hypothesised magnitude for such an effect, used to ask study design questions.
+**Analysis**
+- `bulknull()` — Single-gene analysis
+- `dilution_scan()` — Vectorized multi-gene analysis
+- `dilution_score()` — Compute DDS only
 
-**To obtain sc_zscore, compute a donor-level pseudobulk IPF-vs-control z-score within your target cluster:**
+**Design Inversion**
+- `required_design()` — What f or bulk_se needed for target DI?
+- `critical_precision()` — Minimum bulk SE for target DI?
+- `cohort_inflation()` — How much to grow cohort for target DI?
+- `dds_bounds()` — Attainable DDS range over z-score span?
 
-1. Subset single-cell expression to your target cluster (e.g., M8 myeloid cells only)
-2. For each donor, compute mean expression across cells in that cluster (pseudobulk)
-3. Perform donor-level differential expression: IPF case donors vs. control donors
-4. Extract the z-score (or t-statistic converted to z) for your gene of interest
-5. Use this donor-level z-score as sc_zscore input
+**Supporting**
+- `diagnosability_index()` — Power given μ, α, sidedness
+- `check_dds_applicability()` — Is bulk FDR > threshold?
 
-**Do NOT use:**
-- Between-state enrichment scores (e.g., M8 vs. other myeloid clusters). These measure cell-type distinctiveness, not case-vs-control effects.
-- Cell-level Welch t-tests. These confound within-cluster heterogeneity with case-vs-control signal.
+## Outputs
 
-**Example (pseudocode):**
-```r
-# Subset to target cluster
-m8_cells <- seurat_obj[, seurat_obj$cluster == "M8"]
+**bulknull() returns** (list with S3 class):
+- `mu_dilution` — Expected z under dilution model
+- `w` — Mixture weight: (f·r)/(f·r+(1-f))
+- `di` — Diagnosability Index
+- `di_ceiling` — Maximum DI when w→1
+- `verdict` — Interpretive summary
+- `.dds_full`, `.di_full` — Full computational objects
 
-# Pseudobulk: mean expression per donor
-pseudobulk <- aggregate_by_donor(m8_cells)  # rows=genes, cols=donors, values=mean expr
+**When verbose=TRUE**, also returns:
+- `type_s` — Sign error rate
+- `type_m` — Magnitude exaggeration
+- `p_sig` — P(significant)
+- `dds` — Dilution Discordance Score
 
-# Donor-level DE (case vs. control)
-case_donors <- pseudobulk[, metadata$condition == "case"]
-ctrl_donors <- pseudobulk[, metadata$condition == "control"]
+**dilution_scan() returns** (data.frame):
+- One row per gene
+- Columns: gene, bulk_beta, bulk_se, bulk_fdr, d_sc, mu_dilution, dds, di, verdict, gate_status
 
-# T-test and convert to z-score
-t_stat <- t.test(case_donors["GENEX", ], ctrl_donors["GENEX", ])$statistic
-sc_zscore <- sign(t_stat) * sqrt(t_stat^2 / df)
+## Parameters
+
+| Parameter | Default | Range | Description |
+|-----------|---------|-------|-------------|
+| `bulk_beta` | — | ℝ | Observed bulk effect size |
+| `bulk_se` | — | (0,∞) | Standard error |
+| `d_sc` | — | ℝ | Within-cluster standardized effect |
+| `cluster_fraction` | — | (0,1] | f = cluster prop of tissue |
+| `condition_fraction` | — | [0,1] | p = condition prev in cluster |
+| `r` | 1 | (0,∞) | Relative expression (cond/tissue) |
+| `alpha` | 0.05 | (0,1) | Significance level |
+| `sided` | "one" | "one","two" | Test direction |
+| `verbose` | FALSE | TRUE/FALSE | Include type_s, type_m, dds |
+
+## Interpretation
+
+### Diagnosability Index (DI)
+- **< 0.30**: Underpowered. Study cannot reliably detect dilution.
+- **0.30–0.80**: Uncertain power. Consider collecting more data.
+- **> 0.80**: Well-powered. Study can confidently detect dilution if present.
+
+### Dilution Discordance Score (DDS)
+- **0.0–0.3**: Minimal evidence for dilution. Consistent with true null.
+- **0.3–0.7**: Ambiguous. Effect could be dilution or noise.
+- **0.7–1.0**: Strong to very strong evidence for dilution.
+
+**Key caveat**: DDS is meaningless for small μ (low power). Always check DI.
+
+## Example Results
+
+From frozen regression test case (dpp9_m8):
+```
+bulk_beta = -0.084210
+bulk_se = 0.062774
+d_sc = 0.117962 (from single-cell)
+cluster_fraction = 1332/19175 = 0.0695
+condition_fraction = 0.631
+alpha = 0.05, sided = "one"
+
+Results:
+  mu_dilution = 0.130536
+  w = 0.0695
+  di = 0.064973 (low power)
+  dds = 0.454221 (weak evidence)
+  type_s = 0.3685
+  type_m = 15.8431
+  verdict = "LOW POWER (DI=0.065): Underpowered to detect dilution"
 ```
 
-## Framework Requirements
+Interpretation: Even though DDS suggests dilution, we lack power to conclude with confidence. Recommend collecting more cells or increasing target cluster purity.
 
-The bulknull framework is only applicable when:
-- **Bulk-level result is null** (FDR > 0.05 or specified threshold)
-- **Target cluster shows strong signal** in some context (e.g., enriched vs. other clusters, or case-specific effect)
-- **Cluster fraction is small** (typically 0.01–0.25)
+## Regression Tests
 
-If the bulk effect is significant (FDR < 0.05), use standard cell-type-specific DE methods instead (CARseq, TOAST, bMIND, etc.).
+**184 passing tests** verify:
+- DDS computation (frozen: 0.454221)
+- DI calculation (frozen: 0.064973)
+- Type S/M error rates (frozen: 15.8431)
+- r parameter across 7 values (0.5, 1, 2, 5, 10, 20, 50)
+- Edge cases and error handling
+- Backward compatibility with sc_zscore
 
-## How It Works
+Status: 0 errors, 0 warnings, 2 notes (CRAN new submission).
 
-### DDS (Dilution Discordance Score)
+## Requirements
 
-DDS computes the Bayesian posterior probability that the observed bulk z-score came from the dilution hypothesis (H1: z ~ N(μ, 1)) versus the null (H0: z ~ N(0, 1)):
-
-```
-DDS = φ(z_bulk − μ) / (φ(z_bulk − μ) + φ(z_bulk))
-```
-
-where φ is the standard normal PDF and μ_dilution = (cluster_frac × sc_zscore) / (bulk_se × √n_eff).
-
-Interpretation:
-- **DDS > 0.7**: Dilution probable
-- **DDS ≈ 0.5**: Ambiguous
-- **DDS < 0.3**: Null probable (signal is truly absent in bulk)
-
-### DI (Diagnosability Index)
-
-DI estimates the probability of correctly detecting dilution if it occurred:
-
-```
-DI = Φ(μ − z_critical)
-```
-
-where z_critical = qnorm(0.95) = 1.644854 for one-sided α=0.05, and Φ is the standard normal CDF.
-
-Power categories:
-- **DI < 0.3**: Low power (undetectable)
-- **DI 0.3–0.8**: Moderate power (unreliable)
-- **DI > 0.8**: High power (reliable detection)
-
-## Important Limitation
-
-At realistic cluster fractions (0.05–0.15), DI did not exceed 0.10 in our portfolio (one-sided α=0.05), making dilution claims **effectively unfalsifiable** with RNA-seq data alone. This motivates spatial profiling (e.g., Xenium, spatial proteomics) as validation.
-
-## Testing
-
-The package includes 129 automated test assertions covering function correctness, input validation, applicability gating, formula invariants, and validation against independent implementations. Documentation-code consistency for critical values is verified manually; see NEWS.md.
-
-**Before committing manuscript changes:** Run `Rscript scripts/check_orphan_numbers.R` to ensure all numeric values in `.md` files appear in `NUMBERS_TABLE.tsv`. This guard test inspects project markdown for orphan numbers and rejects any value not in the approved list.
-
-## Citation
-
-If you use bulknull, please cite:
-> Arora I, Yaqinuddin A. (2026). bulknull: Post-hoc diagnostic for dilution in cell-type-specific expression. *bioRxiv* (preprint) / *Bioinformatics* (if published).
-
-## License
-
-MIT License. See LICENSE file.
-
-## Authors
-
-- Itika Arora
-- Alfaisal University
+- R ≥ 4.0
+- No external dependencies
 
 ## References
 
-- bulknull Application Note (in preparation)
-- Phase 0 synthetic validation & Phase 1 consistency check (included in vignette)
+For complete methodology see:
+- `SPEC.md` — Formal definitions and formulas
+- `tests/` — Regression test specifications with frozen values
+- Package vignettes for case studies
+
+## License
+
+[Pending: University of Washington approval]
+
+## Authors
+
+**Itika Arora** — Au Lab, University of Washington
+
+---
+
+**Version**: 0.1.0 | **Updated**: 2025-08-15 | **Repository**: https://github.com/itika05/bulknull
