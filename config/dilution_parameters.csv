@@ -1,0 +1,46 @@
+value,type,source,description
+1.644854,derived,stats::qnorm(0.95),z_critical one-sided alpha=0.05
+1.959964,derived,stats::qnorm(0.975),z_critical two-sided alpha=0.05
+0.95,derived,qnorm critical value,one-sided normal critical point
+0.975,derived,qnorm critical value,two-sided normal critical point
+0.7,threshold,DDS interpretation,DDS > 0.7 suggests dilution
+0.3,threshold,DDS interpretation,DDS < 0.3 suggests genuine absence
+0.5,threshold,DDS interpretation,DDS ≈ 0.5 indicates ambiguity
+0.05,threshold,applicability gate,default bulk FDR threshold for null
+0.1,threshold,DI interpretation,DI < 0.1 indicates very low power
+0.3,threshold,DI interpretation,DI < 0.3 indicates insufficient power
+0.8,threshold,DI interpretation,DI > 0.8 indicates high power
+0.01,parameter,synthetic design,cluster fraction lower bound
+0.50,parameter,synthetic design,cluster fraction upper bound
+0.5,parameter,synthetic design,effect size lower bound (SD units)
+3.0,parameter,synthetic design,effect size upper bound (SD units)
+100,parameter,synthetic design,cluster size lower bound
+5000,parameter,synthetic design,cluster size upper bound
+10000,parameter,synthetic design,number of simulations
+0.72,result,synthetic validation,median DDS true dilution scenarios
+0.18,result,synthetic validation,median DDS genuine null scenarios
+0.80,result,synthetic validation,detection rate DI > 0.5
+0.30,result,synthetic validation,detection rate DI < 0.3
+0.05,parameter,portfolio analysis,cluster fraction lower bound
+0.15,parameter,portfolio analysis,cluster fraction upper bound
+0.10,result,portfolio analysis,maximum DI observed
+0.0695,derived,1332/19175,cluster_fraction = n_cluster / n_total for DPP9/M8
+1332,observation,DPP9/M8 case study,n_cluster Tregs in k=5 tissue-only
+19175,observation,DPP9/M8 case study,n_total cells in k=5 tissue-only
+-0.084210,observation,DPP9/M8 case study,bulk_beta DPP9
+0.062774,observation,DPP9/M8 case study,bulk_se DPP9
+0.449745,observation,DPP9/M8 case study,bulk_fdr DPP9
+2.077409,observation,DPP9/M8 case study,single-cell z-score DPP9 in M8
+0.631,observation,DPP9/M8 case study,condition_fraction case/control in k=5 tissue-only (5 series: GSE10667 excluded)
+5,metadata,DPP9/M8 case study,number of lung tissue series forming k=5 tissue-only cohort
+0.1305362,derived,dilution_score formula,mu_dilution for DPP9/M8 k=5 tissue-only
+-1.3414790,derived,z_bulk = beta/se,z_bulk for DPP9/M8 k=5 tissue-only
+0.4542207,derived,DDS formula,DDS for DPP9/M8 k=5 tissue-only
+0.064973,derived,DI formula one-sided,DI one-sided alpha=0.05 for DPP9/M8 parameters
+0.033668,derived,DI formula two-sided,DI two-sided alpha=0.05 for DPP9/M8 parameters
+52,observation,package tests,"count of automated test assertions (test_*.R files)"
+1e-3,parameter,test tolerance,"frozen values tolerance (practical float precision)"
+1e-5,parameter,test tolerance,"formula invariant tolerance (critical values)"
+1e-6,parameter,test tolerance,"critical value verification tolerance"
+0.25,parameter,README framework,"cluster fraction upper bound typical studies"
+4.1,parameter,README system requirements,"minimum R version (4.1.0)"

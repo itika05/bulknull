@@ -1,0 +1,124 @@
+#' Dilution Discordance Score (DDS)
+#'
+#' Compute the Bayesian posterior probability that an observed bulk-level effect
+#' reflects true dilution of a single-cell signal.
+#'
+#' @param bulk_beta Numeric. Observed bulk effect size (Hedges' g or log2-fold-change).
+#' @param bulk_se Numeric. Standard error of bulk effect size.
+#' @param bulk_fdr Numeric. FDR-adjusted p-value from bulk analysis (or raw p-value).
+#'                          Used for validation only; not directly in likelihood.
+#' @param sc_zscore Numeric. Single-cell module z-score or effect z-score
+#'                           (e.g., z-score of module enrichment in the subcluster).
+#' @param cluster_fraction Numeric. Fraction of total tissue represented by the
+#'                                  responsible subcluster (0 < f <= 1).
+#' @param condition_fraction Numeric. Fraction of subcluster cells from the
+#'                                    condition of interest (e.g., IPF, 0 <= p <= 1).
+#' @param n_cluster Integer. Number of cells in the subcluster.
+#' @param null_fdr_threshold Numeric. FDR threshold for bulk to be considered "null".
+#'                           Default: 0.05. Only used if bulk_fdr is provided.
+#' @param on_violation Character. One of "error", "warn", "pass". Controls behavior
+#'                     when bulk FDR is significant. Default: "warn".
+#'
+#' @return
+#' A list with elements:
+#'   - dds_score: Posterior probability of dilution (0 to 1).
+#'   - z_bulk: Bulk z-score (β / SE).
+#'   - mu_dilution: Expected z under dilution model.
+#'   - log_lik_h1: Log-likelihood under dilution model.
+#'   - log_lik_h0: Log-likelihood under null model.
+#'   - summary: Plain-text interpretation.
+#'   - applicable: Logical. TRUE if case is applicable (bulk is null), FALSE if not.
+#'   - applicability_note: Character string describing applicability status.
+#'   - call: The matched function call.
+#'
+#' @examples
+#' # DPP9 in M8 (IPF inflammasome macrophages)
+#' dilution_score(
+#'   bulk_beta = -0.0297,
+#'   bulk_se = 0.0595,
+#'   bulk_fdr = 0.821,
+#'   sc_zscore = 2.077,
+#'   cluster_fraction = 1332 / 19175,
+#'   condition_fraction = 0.631,
+#'   n_cluster = 1332
+#' )
+#'
+#' @importFrom stats dnorm
+#' @export
+dilution_score <- function(
+    bulk_beta,
+    bulk_se,
+    bulk_fdr,
+    sc_zscore,
+    cluster_fraction,
+    condition_fraction,
+    n_cluster,
+    null_fdr_threshold = 0.05,
+    on_violation = c("error", "warn", "pass")
+) {
+
+  on_violation <- match.arg(on_violation)
+
+  # Input validation
+  if (bulk_se <= 0) stop("bulk_se must be positive")
+  if (!(0 < cluster_fraction && cluster_fraction <= 1)) {
+    stop("cluster_fraction must be in (0, 1]")
+  }
+  if (!(0 <= condition_fraction && condition_fraction <= 1)) {
+    stop("condition_fraction must be in [0, 1]")
+  }
+  if (n_cluster < 1) stop("n_cluster must be >= 1")
+
+  # Applicability gate
+  gate_result <- check_dds_applicability(
+    bulk_fdr = bulk_fdr,
+    null_fdr_threshold = null_fdr_threshold,
+    on_violation = on_violation
+  )
+
+  # Compute bulk z-score
+  z_bulk <- bulk_beta / bulk_se
+
+  # Expected effect size under dilution model (corrected formula)
+  n_eff_sc <- condition_fraction * (1 - condition_fraction) * n_cluster
+  d_sc <- sc_zscore / sqrt(n_eff_sc)
+  d_bulk_expected <- cluster_fraction * d_sc
+  mu_dilution <- d_bulk_expected / bulk_se
+
+  # Likelihood ratio test
+  log_lik_h1 <- dnorm(z_bulk, mean = mu_dilution, sd = 1, log = TRUE)
+  log_lik_h0 <- dnorm(z_bulk, mean = 0, sd = 1, log = TRUE)
+
+  # Convert to probability (posterior probability of H1)
+  log_posterior_odds <- log_lik_h1 - log_lik_h0
+  dds_score <- 1 / (1 + exp(-log_posterior_odds))
+
+  # Interpretation
+  if (dds_score > 0.9) {
+    interpretation <- "STRONG evidence for dilution (dds > 0.9)"
+  } else if (dds_score > 0.7) {
+    interpretation <- "MODERATE-to-STRONG evidence for dilution (0.7 < dds <= 0.9)"
+  } else if (dds_score > 0.5) {
+    interpretation <- "WEAK-to-MODERATE evidence for dilution (0.5 < dds <= 0.7)"
+  } else if (dds_score > 0.3) {
+    interpretation <- "WEAK evidence for dilution (0.3 < dds <= 0.5)"
+  } else {
+    interpretation <- paste("MINIMAL evidence for dilution (dds <= 0.3);",
+                            "consistent with genuine null")
+  }
+
+  # Return structured result
+  return(
+    list(
+      dds_score = dds_score,
+      z_bulk = z_bulk,
+      mu_dilution = mu_dilution,
+      log_lik_h1 = log_lik_h1,
+      log_lik_h0 = log_lik_h0,
+      summary = interpretation,
+      applicable = gate_result$applicable,
+      applicability_note = gate_result$applicability_note,
+      call = match.call()
+    )
+  )
+}

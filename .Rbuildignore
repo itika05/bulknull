@@ -1,0 +1,12 @@
+^\.github$
+^\.Rbuildignore$
+^\.DS_Store$
+^data-raw$
+^scripts$
+^config$
+^GITHUB_ZENODO_SETUP\.md$
+^RELEASE_CHECKLIST\.md$
+^NUMBERS_TABLE\.tsv$
+^APPLICATION_NOTE\.md$
+^SPEC\.md$
+^ISSUES\.md$

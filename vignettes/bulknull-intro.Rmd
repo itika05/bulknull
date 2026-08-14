@@ -1,0 +1,208 @@
+---
+title: "Introduction to bulknull"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to bulknull}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+The **bulknull** package provides tools for assessing whether a non-significant bulk-level result reflects genuine absence of effect or dilution of a signal in a small cell-type subcluster.
+
+**Key point:** bulknull asks "IF there were a within-cluster IPF-vs-control effect of size X, would we have power to detect it?" It does NOT measure within-cluster effects directly. You supply a hypothesised effect size (sc_zscore); the package computes:
+
+1. **Dilution Discordance Score (DDS)**: Posterior probability that bulk nullness reflects dilution
+2. **Diagnosability Index (DI)**: Statistical power to detect dilution at the hypothesised effect size
+
+## Installation
+
+```r
+# Install from GitHub (if available)
+# devtools::install_github("arora-lab/bulknull")
+```
+
+## Obtaining sc_zscore: Computing Within-Cluster Effect Size
+
+The `sc_zscore` input represents a hypothesised within-cluster IPF-vs-control effect size. You must compute this from your own single-cell data by:
+
+1. Subsetting to your target cluster only
+2. Computing pseudobulk (mean expression) per donor
+3. Performing donor-level differential expression (case vs. control)
+4. Extracting the z-score for your gene
+
+**Do NOT use between-state enrichment scores** (e.g., cluster A vs. cluster B). These measure cell-type distinctiveness, not case-vs-control effects.
+
+**Example (pseudocode):**
+```r
+# Subset to target cluster
+m8_cells <- seurat_obj[, seurat_obj$cluster == "M8"]
+
+# Pseudobulk per donor
+pb <- AggregateExpression(m8_cells, group.by = "donor", assays = "RNA")
+
+# Donor-level DE: case vs control
+case_donors <- pb[, metadata[colnames(pb), "condition"] == "case"]
+ctrl_donors <- pb[, metadata[colnames(pb), "condition"] == "control"]
+
+# T-test to z-score
+t_res <- t.test(case_donors["GENE", ], ctrl_donors["GENE", ])
+sc_zscore <- sign(t_res$statistic) * sqrt(t_res$statistic^2 / df)
+```
+
+## Quick Start
+
+Load the package and example data:
+
+```{r setup}
+library(bulknull)
+data(dpp9_m8)
+```
+
+The example dataset contains measurements for DPP9 expression in the M8 (inflammatory macrophages) subcluster. **The sc_zscore value (2.077409) in this example is a hypothesised effect size, not a measured IPF-vs-control effect within M8.** See above for how to compute a real sc_zscore from your data:
+
+```{r}
+str(dpp9_m8)
+```
+
+## Computing the Dilution Discordance Score
+
+The DDS quantifies whether a bulk-null result could reflect dilution of a single-cell signal:
+
+```{r}
+result <- dilution_score(
+  bulk_beta = dpp9_m8$bulk_beta,
+  bulk_se = dpp9_m8$bulk_se,
+  bulk_fdr = dpp9_m8$bulk_fdr,
+  sc_zscore = dpp9_m8$sc_zscore,
+  cluster_fraction = dpp9_m8$cluster_fraction,
+  condition_fraction = dpp9_m8$condition_fraction,
+  n_cluster = dpp9_m8$n_cluster
+)
+```
+
+Print the results:
+
+```{r}
+cat("DDS Score:", result$dds_score, "\n")
+cat("Interpretation:", result$summary, "\n")
+cat("Applicable:", result$applicable, "\n")
+cat("Note:", result$applicability_note, "\n")
+```
+
+## Interpreting the Dilution Discordance Score
+
+The DDS is a posterior probability in [0, 1]:
+
+- **DDS > 0.7**: Strong evidence for dilution (signal likely present in cluster, diluted out in bulk)
+- **0.5 < DDS ≤ 0.7**: Weak-to-moderate evidence for dilution
+- **0.3 < DDS ≤ 0.5**: Weak evidence for dilution
+- **DDS ≤ 0.3**: Minimal evidence for dilution; consistent with genuine bulk null
+
+In the DPP9/M8 case, DDS ≈ 0.48, indicating ambiguity: the result could reflect either true absence or dilution.
+
+## Applicability Gate
+
+The framework includes an applicability gate that requires the bulk result to be non-significant:
+
+```{r}
+# This case is applicable (bulk FDR > 0.05)
+if (!result$applicable) {
+  warning("This case is not applicable for DDS analysis.")
+  warning(result$applicability_note)
+}
+```
+
+For bulk-significant results, use standard cell-type-specific DE methods instead.
+
+## Computing the Diagnosability Index
+
+The DI provides a pre-data power assessment. For the DPP9/M8 case, we compute the expected
+dilution effect size (mu_dilution) and then compute DI:
+
+```{r}
+# Compute mu_dilution from the components (same formula as inside dilution_score)
+n_eff_sc <- dpp9_m8$condition_fraction * (1 - dpp9_m8$condition_fraction) * dpp9_m8$n_cluster
+d_sc <- dpp9_m8$sc_zscore / sqrt(n_eff_sc)
+d_bulk_expected <- dpp9_m8$cluster_fraction * d_sc
+mu_dilution <- d_bulk_expected / dpp9_m8$bulk_se
+
+# Compute DI
+di_result <- diagnosability_index(
+  mu_dilution = mu_dilution,
+  alpha = 0.05,
+  sided = "one"
+)
+```
+
+Print the DI result:
+
+```{r}
+cat("Diagnosability Index:", di_result$di, "\n")
+if (di_result$di < 0.3) {
+  cat("Low power: Study design may be inadequate for dilution detection.\n")
+} else if (di_result$di > 0.8) {
+  cat("High power: Study design provides good power for dilution detection.\n")
+} else {
+  cat("Moderate power: Study design has moderate power for dilution detection.\n")
+}
+```
+
+## Workflow: DDS with DI Context
+
+Best practice is to report DDS alongside DI:
+
+1. **Compute DI first** (pre-data or when planning study)
+2. **If DI < 0.3**: Study is underpowered; report DDS but note low power
+3. **If 0.3 ≤ DI ≤ 0.8**: Moderate power; interpret DDS carefully
+4. **If DI > 0.8**: High power; DDS interpretation is reliable
+
+## Example: Multiple Gene-Cluster Pairs
+
+To analyze multiple genes and clusters, apply DDS to each pair:
+
+```{r}
+# Example: Create a simple table of inputs
+input_data <- data.frame(
+  gene = c("DPP9", "SPP1", "CXCL10"),
+  bulk_beta = c(-0.030, 0.150, 0.200),
+  bulk_se = rep(0.060, 3),
+  bulk_fdr = c(0.821, 0.005, 0.001),
+  sc_zscore = c(2.077, 3.245, 2.890),
+  cluster_fraction = c(0.0695, 0.1200, 0.0850),
+  condition_fraction = rep(0.631, 3),
+  n_cluster = c(1332, 2100, 1800)
+)
+
+# Apply DDS to each row (in practice, use sapply or mapply)
+# results <- apply(input_data, 1, function(row) {
+#   dilution_score(
+#     bulk_beta = as.numeric(row["bulk_beta"]),
+#     bulk_se = as.numeric(row["bulk_se"]),
+#     bulk_fdr = as.numeric(row["bulk_fdr"]),
+#     sc_zscore = as.numeric(row["sc_zscore"]),
+#     cluster_fraction = as.numeric(row["cluster_fraction"]),
+#     condition_fraction = as.numeric(row["condition_fraction"]),
+#     n_cluster = as.numeric(row["n_cluster"])
+#   )
+# })
+```
+
+## References
+
+- Newman et al. (2015) Robust enumeration of cell subsets from tissue expression profiles. Nature Methods.
+- Borenstein et al. Introduction to Meta-Analysis (deconvolution section on linear mixtures).
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
