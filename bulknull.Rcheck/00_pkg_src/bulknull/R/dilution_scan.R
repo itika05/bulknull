@@ -69,7 +69,7 @@
 #'
 #' @export
 dilution_scan <- function(bulk_deg, d_sc_values = NULL, sc_zscores = NULL,
-                          cluster_fraction, condition_fraction, n_cluster = NULL,
+                          cluster_fraction, condition_fraction, r = 1, n_cluster = NULL,
                           n_eff_basis = c("cell", "donor"), n_donors = NULL,
                           null_fdr_threshold = 0.05, alpha = 0.05,
                           sided = c("one", "two")) {
@@ -154,6 +154,7 @@ dilution_scan <- function(bulk_deg, d_sc_values = NULL, sc_zscores = NULL,
         sc_zscore = sc_zscore,
         cluster_fraction = cluster_fraction,
         condition_fraction = condition_fraction,
+        r = r,
         n_cluster = n_cluster,
         n_eff_basis = n_eff_basis,
         n_donors = n_donors,
@@ -204,10 +205,15 @@ dilution_scan <- function(bulk_deg, d_sc_values = NULL, sc_zscores = NULL,
 
   # Helper function to extract value, handling NULL -> NA
   extract_with_na <- function(lst, key) {
-    vapply(lst, function(x) {
+    vals <- lapply(lst, function(x) {
       val <- x[[key]]
       if (is.null(val)) NA else val
-    }, FUN.VALUE = numeric(1), USE.NAMES = FALSE)
+    })
+    # Try to coerce to numeric, fall back to character if not numeric
+    tryCatch(
+      as.numeric(unlist(vals)),
+      warning = function(w) unlist(vals)
+    )
   }
 
   # Extract columns from all results

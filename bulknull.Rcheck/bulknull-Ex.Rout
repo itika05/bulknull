@@ -82,17 +82,17 @@ COMPUTED STATISTICS:
   z (bulk):                      -0.4991597 
 
 DILUTION DISCORDANCE SCORE (DDS):
-  Value:                         0.4804423 
-  Interpretation:                Weak evidence for dilution 
+  Value:                         WEAK evidence for dilution (0.3 < dds <= 0.5) 
+  Interpretation:                WEAK evidence for dilution (0.3 < dds <= 0.5) 
   (>0.7 strong | >0.5 moderate | >0.3 weak | <=0.3 minimal)
 
 DIAGNOSABILITY INDEX (DI):
   Value:                         0.06589686 
-  Interpretation:                Low power (underpowered) 
+  Interpretation:                Low power 
   (<0.3 low power | <0.8 moderate | >=0.8 high power)
 
 VERDICT:
-   UNDERPOWERED: Study lacks power to detect dilution; DDS result inconclusive 
+   LOW POWER (DI=0.066): Underpowered to detect dilution 
 
 > 
 > 
@@ -326,18 +326,22 @@ $formula
 +   n_cluster = 1332
 + )
 > print(result)
-   gene bulk_beta bulk_se bulk_fdr sc_zscore       d_sc mu_dilution       dds
-1 GENE1    -0.084   0.063    0.450     2.077 0.11793875  0.13010703 0.4546401
-2 GENE2     0.020   0.050    0.050     1.500 0.08517483  0.11839302 0.5100858
-3 GENE3     0.150   0.100    0.001     0.500 0.02839161  0.01973217 0.5073504
-          di         dds_interpretation        di_interpretation
-1 0.06491830 Weak evidence for dilution Low power (underpowered)
-2 0.06344760             NOT APPLICABLE Low power (underpowered)
-3 0.05206834             NOT APPLICABLE Low power (underpowered)
-                                                                      verdict
-1 UNDERPOWERED: Study lacks power to detect dilution; DDS result inconclusive
-2     FRAMEWORK NOT APPLICABLE: Bulk effect is significant (FDR <= threshold)
-3     FRAMEWORK NOT APPLICABLE: Bulk effect is significant (FDR <= threshold)
+   gene bulk_beta bulk_se bulk_fdr sc_zscore       d_sc mu_dilution
+1 GENE1    -0.084   0.063    0.450     2.077 0.11793875  0.13010703
+2 GENE2     0.020   0.050    0.050     1.500 0.08517483  0.11839302
+3 GENE3     0.150   0.100    0.001     0.500 0.02839161  0.01973217
+                                                        dds         di
+1             WEAK evidence for dilution (0.3 < dds <= 0.5) 0.06491830
+2 WEAK-to-MODERATE evidence for dilution (0.5 < dds <= 0.7) 0.06344760
+3 WEAK-to-MODERATE evidence for dilution (0.5 < dds <= 0.7) 0.05206834
+                                         dds_interpretation di_interpretation
+1             WEAK evidence for dilution (0.3 < dds <= 0.5)         Low power
+2 WEAK-to-MODERATE evidence for dilution (0.5 < dds <= 0.7)         Low power
+3 WEAK-to-MODERATE evidence for dilution (0.5 < dds <= 0.7)         Low power
+                                                                  verdict
+1                   LOW POWER (DI=0.065): Underpowered to detect dilution
+2 FRAMEWORK NOT APPLICABLE: Bulk effect is significant (FDR <= threshold)
+3 FRAMEWORK NOT APPLICABLE: Bulk effect is significant (FDR <= threshold)
   gate_status
 1      PASSED
 2      FAILED
@@ -378,6 +382,9 @@ $z_bulk
 
 $mu_dilution
 [1] 0.1377875
+
+$w
+[1] 0.0695
 
 $d_sc
 [1] 0.117962
@@ -421,6 +428,9 @@ $z_bulk
 
 $mu_dilution
 [1] 0.1377604
+
+$w
+[1] 0.0695
 
 $d_sc
 [1] 0.1179388
@@ -550,7 +560,7 @@ To achieve DI = 0.3000 at cluster_fraction = 0.069465:
 > cleanEx()
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  0.138 0.008 0.146 0 0 
+Time elapsed:  0.155 0.009 0.165 0 0 
 > grDevices::dev.off()
 null device 
           1 

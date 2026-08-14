@@ -56,7 +56,7 @@
 #'
 #' @export
 required_design <- function(target_di, d_sc = NULL, sc_zscore = NULL,
-                             condition_fraction, r = 1, n_cluster = NULL,
+                             condition_fraction, n_cluster = NULL,
                              n_eff_basis = c("cell", "donor"), n_donors = NULL,
                              cluster_fraction, bulk_se, alpha = 0.05,
                              sided = c("one", "two")) {

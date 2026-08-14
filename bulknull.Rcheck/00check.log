@@ -10,7 +10,7 @@
 * checking for file ‘bulknull/DESCRIPTION’ ... OK
 * this is package ‘bulknull’ version ‘0.1.0’
 * package encoding: UTF-8
-* checking CRAN incoming feasibility ... [2s/15s] NOTE
+* checking CRAN incoming feasibility ... [3s/17s] NOTE
 Maintainer: ‘Itika Arora <itiarora@alfaisal.edu>’
 
 New submission
@@ -48,19 +48,110 @@ New submission
 * checking Rd files ... OK
 * checking Rd metadata ... OK
 * checking Rd line widths ... OK
-* checking Rd cross-references ... WARNING
-Missing link(s) in Rd file 'dds_bounds.Rd':
-  ‘-1.96, 1.96’
-
-See section 'Cross-references' in the 'Writing R Extensions' manual.
-
-Found the following Rd file(s) with Rd \link{} targets missing package
-anchors:
-  dds_bounds.Rd: -1.96, 1.96
-Please provide package anchors for all Rd \link{} targets not in the
-package itself and the base packages.
+* checking Rd cross-references ... OK
 * checking for missing documentation entries ... OK
-* checking for code/documentation mismatches ... OK
+* checking for code/documentation mismatches ... WARNING
+Codoc mismatches from Rd file 'bulknull.Rd':
+bulknull
+  Code: function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore =
+                 NULL, cluster_fraction, condition_fraction, r = 1,
+                 n_cluster = NULL, n_eff_basis = c("cell", "donor"),
+                 n_donors = NULL, null_fdr_threshold = 0.05,
+                 on_violation = c("error", "warn", "pass"), alpha =
+                 0.05, sided = c("one", "two"), verbose = FALSE)
+  Docs: function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore =
+                 NULL, cluster_fraction, condition_fraction, n_cluster
+                 = NULL, n_eff_basis = c("cell", "donor"), n_donors =
+                 NULL, null_fdr_threshold = 0.05, on_violation =
+                 c("error", "warn", "pass"), alpha = 0.05, sided =
+                 c("one", "two"))
+  Argument names in code not in docs:
+    r verbose
+  Mismatches in argument names (first 3):
+    Position: 8 Code: r Docs: n_cluster
+    Position: 9 Code: n_cluster Docs: n_eff_basis
+    Position: 10 Code: n_eff_basis Docs: n_donors
+
+Codoc mismatches from Rd file 'cohort_inflation.Rd':
+cohort_inflation
+  Code: function(mu_observed, target_di = 0.8, r = 1, alpha = 0.05,
+                 sided = c("one", "two"))
+  Docs: function(mu_observed, target_di = 0.8, alpha = 0.05, sided =
+                 c("one", "two"))
+  Argument names in code not in docs:
+    r
+  Mismatches in argument names:
+    Position: 3 Code: r Docs: alpha
+    Position: 4 Code: alpha Docs: sided
+
+Codoc mismatches from Rd file 'critical_precision.Rd':
+critical_precision
+  Code: function(d_sc, bulk_se, target_di = 0.8, r = 1, alpha = 0.05,
+                 sided = c("one", "two"))
+  Docs: function(d_sc, bulk_se, target_di = 0.8, alpha = 0.05, sided =
+                 c("one", "two"))
+  Argument names in code not in docs:
+    r
+  Mismatches in argument names:
+    Position: 4 Code: r Docs: alpha
+    Position: 5 Code: alpha Docs: sided
+
+Codoc mismatches from Rd file 'dilution_scan.Rd':
+dilution_scan
+  Code: function(bulk_deg, d_sc_values = NULL, sc_zscores = NULL,
+                 cluster_fraction, condition_fraction, r = 1, n_cluster
+                 = NULL, n_eff_basis = c("cell", "donor"), n_donors =
+                 NULL, null_fdr_threshold = 0.05, alpha = 0.05, sided =
+                 c("one", "two"))
+  Docs: function(bulk_deg, d_sc_values = NULL, sc_zscores = NULL,
+                 cluster_fraction, condition_fraction, n_cluster =
+                 NULL, n_eff_basis = c("cell", "donor"), n_donors =
+                 NULL, null_fdr_threshold = 0.05, alpha = 0.05, sided =
+                 c("one", "two"))
+  Argument names in code not in docs:
+    r
+  Mismatches in argument names (first 3):
+    Position: 6 Code: r Docs: n_cluster
+    Position: 7 Code: n_cluster Docs: n_eff_basis
+    Position: 8 Code: n_eff_basis Docs: n_donors
+
+Codoc mismatches from Rd file 'dilution_score.Rd':
+dilution_score
+  Code: function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore =
+                 NULL, cluster_fraction, condition_fraction, r = 1,
+                 n_cluster = NULL, n_eff_basis = c("cell", "donor"),
+                 n_donors = NULL, null_fdr_threshold = 0.05,
+                 on_violation = c("error", "warn", "pass"))
+  Docs: function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore =
+                 NULL, cluster_fraction, condition_fraction, n_cluster
+                 = NULL, n_eff_basis = c("cell", "donor"), n_donors =
+                 NULL, null_fdr_threshold = 0.05, on_violation =
+                 c("error", "warn", "pass"))
+  Argument names in code not in docs:
+    r
+  Mismatches in argument names (first 3):
+    Position: 8 Code: r Docs: n_cluster
+    Position: 9 Code: n_cluster Docs: n_eff_basis
+    Position: 10 Code: n_eff_basis Docs: n_donors
+
+Codoc mismatches from Rd file 'required_design.Rd':
+required_design
+  Code: function(target_di, d_sc = NULL, sc_zscore = NULL,
+                 condition_fraction, r = 1, n_cluster = NULL,
+                 n_eff_basis = c("cell", "donor"), n_donors = NULL,
+                 cluster_fraction, bulk_se, alpha = 0.05, sided =
+                 c("one", "two"))
+  Docs: function(target_di, d_sc = NULL, sc_zscore = NULL,
+                 condition_fraction, n_cluster = NULL, n_eff_basis =
+                 c("cell", "donor"), n_donors = NULL, cluster_fraction,
+                 bulk_se, alpha = 0.05, sided = c("one", "two"))
+  Argument names in code not in docs:
+    r
+  Mismatches in argument names (first 3):
+    Position: 5 Code: r Docs: n_cluster
+    Position: 6 Code: n_cluster Docs: n_eff_basis
+    Position: 7 Code: n_eff_basis Docs: n_donors
+
 * checking Rd \usage sections ... OK
 * checking Rd contents ... OK
 * checking for unstated dependencies in examples ... OK
@@ -72,8 +163,25 @@ package itself and the base packages.
 * checking files in ‘vignettes’ ... OK
 * checking examples ... OK
 * checking for unstated dependencies in ‘tests’ ... OK
-* checking tests ... OK
+* checking tests ... ERROR
   Running ‘testthat.R’
+Running the tests in ‘tests/testthat.R’ failed.
+Last 13 lines of output:
+  Differences:
+  `actual`:   FALSE
+  `expected`: TRUE 
+  
+  ── Failure ('test_dilution_scan.R:113:3'): dilution_scan() computes correct DDS and DI for passing genes ──
+  Expected `grepl("UNDERPOWERED|AMBIGUOUS", result$verdict)` to be TRUE.
+  Differences:
+  `actual`:   FALSE
+  `expected`: TRUE 
+  
+  
+  [ FAIL 8 | WARN 0 | SKIP 0 | PASS 149 ]
+  Error:
+  ! Test failures.
+  Execution halted
 * checking for unstated dependencies in vignettes ... OK
 * checking package vignettes ... OK
 * checking re-building of vignette outputs ... OK
@@ -85,4 +193,4 @@ release or compiling the source code from <https://www.html-tidy.org/>.
 * checking for non-standard things in the check directory ... OK
 * checking for detritus in the temp directory ... OK
 * DONE
-Status: 1 WARNING, 2 NOTEs
+Status: 1 ERROR, 1 WARNING, 2 NOTEs

@@ -9,6 +9,7 @@
 #'
 #' @param mu_observed numeric; observed effect size (bulk z-score / sqrt(n_eff_bulk))
 #' @param target_di numeric; target diagnosability index (0 to 1, default 0.8)
+#' @param r numeric; relative expression parameter. Default 1 (no adjustment). Used for reference only.
 #' @param alpha numeric; significance level (default 0.05)
 #' @param sided character; "one" or "two" for one-sided or two-sided test (default "one")
 #'
@@ -43,7 +44,7 @@
 #'
 #' @importFrom stats qnorm
 #' @export
-cohort_inflation <- function(mu_observed, target_di = 0.8, alpha = 0.05,
+cohort_inflation <- function(mu_observed, target_di = 0.8, r = 1, alpha = 0.05,
                               sided = c("one", "two")) {
 
   sided <- match.arg(sided)

@@ -11,6 +11,8 @@
 #' @param sc_zscore numeric; z-score of signal in target cluster (backward compatibility)
 #' @param cluster_fraction numeric; fraction of total cells in target cluster
 #' @param condition_fraction numeric; fraction of cells in case condition
+#' @param r numeric; relative expression (mean in condition / mean across compartment).
+#'            Default 1 (no relative expression adjustment).
 #' @param n_cluster numeric; number of cells in target cluster (required if sc_zscore supplied)
 #' @param n_eff_basis character; basis for sc_zscore conversion: "cell" or "donor"
 #' @param n_donors numeric; number of donors (required if n_eff_basis = "donor")
@@ -18,27 +20,30 @@
 #' @param on_violation character; "error", "warn", or "pass" (default "error")
 #' @param alpha numeric; significance level for DI (default 0.05)
 #' @param sided character; "one" or "two" for DI computation (default "one")
+#' @param verbose logical; if TRUE, include type_s, type_m, and detailed DDS. Default FALSE.
 #'
 #' @return An S3 object of class "bulknull" containing:
-#'   \item{inputs}{List of input parameters}
-#'   \item{applicability}{List with $applicable (logical) and $note (character)}
-#'   \item{dds}{DDS (Dilution Discordance Score) value}
 #'   \item{mu_dilution}{Expected bulk z-score under dilution hypothesis}
 #'   \item{z_bulk}{Observed bulk z-score}
-#'   \item{d_sc}{Standardized effect size used}
+#'   \item{w}{Mixture weight used}
 #'   \item{di}{Diagnosability Index value}
-#'   \item{verdict}{Interpretive string (e.g., "Ambiguous")}
-#'   \item{gate_status}{Character indicating whether input passed the gate}
+#'   \item{r}{Relative expression parameter used}
+#'   \item{verdict}{Interpretive verdict}
+#'   \item{inputs}{List of all input parameters}
+#'   \item{applicability}{List with $applicable and $note}
+#'   \item{type_s}{Type S error rate (when verbose=TRUE)}
+#'   \item{type_m}{Type M error ratio (when verbose=TRUE)}
+#'   \item{dds}{DDS value (when verbose=TRUE only)}
 #'
 #' @details
 #' The bulknull workflow is:
 #' 1. Check applicability: bulk FDR > threshold (default 0.05)
 #' 2. If applicable, compute DDS (posterior probability of dilution)
 #' 3. Compute DI (power to detect dilution)
-#' 4. Return formatted S3 object with interpretation bands
+#' 4. Optionally compute type_s and type_m under model uncertainty
 #'
-#' The function preserves the full output of dilution_score() and
-#' diagnosability_index() internally for inspection if needed.
+#' The mixture weight w = (f*r)/(f*r + (1-f)) incorporates relative expression.
+#' At r=1, this reduces to w=f, recovering the standard dilution model.
 #'
 #' @examples
 #' # Example: DPP9 in M8 (direct d_sc input, recommended)
@@ -55,13 +60,15 @@
 #'
 #' print(result)
 #'
+#' @importFrom stats qnorm pnorm dnorm
 #' @export
 bulknull <- function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore = NULL,
-                      cluster_fraction, condition_fraction, n_cluster = NULL,
+                      cluster_fraction, condition_fraction, r = 1,
+                      n_cluster = NULL,
                       n_eff_basis = c("cell", "donor"), n_donors = NULL,
                       null_fdr_threshold = 0.05,
                       on_violation = c("error", "warn", "pass"),
-                      alpha = 0.05, sided = c("one", "two")) {
+                      alpha = 0.05, sided = c("one", "two"), verbose = FALSE) {
 
   on_violation <- match.arg(on_violation)
   sided <- match.arg(sided)
@@ -83,6 +90,7 @@ bulknull <- function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore = NULL
     sc_zscore = sc_zscore,
     cluster_fraction = cluster_fraction,
     condition_fraction = condition_fraction,
+    r = r,
     n_cluster = n_cluster,
     n_eff_basis = n_eff_basis,
     n_donors = n_donors,
@@ -97,72 +105,90 @@ bulknull <- function(bulk_beta, bulk_se, bulk_fdr, d_sc = NULL, sc_zscore = NULL
     sided = sided
   )
 
-  # Step 4: Interpret DDS and DI
-  dds_interpretation <- if (!applicability$applicable) {
-    "NOT APPLICABLE"
-  } else if (dds_result$dds_score > 0.7) {
-    "Strong evidence for dilution"
-  } else if (dds_result$dds_score > 0.5) {
-    "Weak-to-moderate evidence for dilution"
-  } else if (dds_result$dds_score > 0.3) {
-    "Weak evidence for dilution"
-  } else {
-    "Minimal evidence for dilution; consistent with genuine bulk null"
-  }
+  # Step 4: Compute type S and type M (under N(mu, 1))
+  mu <- dds_result$mu_dilution
+  z_crit <- if (sided == "one") qnorm(1 - alpha) else qnorm(1 - alpha / 2)
 
-  di_interpretation <- if (di_result$di < 0.3) {
-    "Low power (underpowered)"
-  } else if (di_result$di < 0.8) {
-    "Moderate power (uncertain)"
-  } else {
-    "High power (well-powered)"
-  }
+  # P(significant) under true effect
+  p_sig <- 1 - pnorm(z_crit, mean = mu, sd = 1) + pnorm(-z_crit, mean = mu, sd = 1)
 
-  # Build verdict
+  # Type S = P(sign error | significant)
+  # = P(z < -z_crit) / [P(z < -z_crit) + P(z > z_crit)]
+  p_neg <- pnorm(-z_crit, mean = mu, sd = 1)
+  p_pos <- 1 - pnorm(z_crit, mean = mu, sd = 1)
+  type_s <- if (p_sig > 0) p_neg / p_sig else NA_real_
+
+  # Type M = E[|z| | |z| > z_crit] / mu
+  # E[|z| | |z| > z_crit] requires numerical integration
+  # Approximation: for positive mu and z > z_crit, use tail expectation
+  mean_pos <- (dnorm(z_crit, mean = mu, sd = 1) - dnorm(-z_crit, mean = mu, sd = 1)) / (p_sig + 1e-16)
+  type_m <- if (mu > 0 && p_sig > 0) mean_pos / mu else NA_real_
+
+  # Build verdict (simplified, no interpretation bands per TASK 4)
   verdict <- if (!applicability$applicable) {
     "FRAMEWORK NOT APPLICABLE: Bulk effect is significant (FDR <= threshold)"
-  } else if (dds_result$dds_score > 0.7 && di_result$di > 0.3) {
-    "LIKELY DILUTION: Strong DDS evidence and adequate power"
-  } else if (dds_result$dds_score > 0.5 && di_result$di > 0.3) {
-    "POSSIBLE DILUTION: Moderate DDS evidence with adequate power"
-  } else if (di_result$di < 0.3) {
-    "UNDERPOWERED: Study lacks power to detect dilution; DDS result inconclusive"
+  } else if (di_result$di > 0.8) {
+    sprintf("ADEQUATE POWER (DI=%.3f): Can detect dilution if present", di_result$di)
+  } else if (di_result$di > 0.3) {
+    sprintf("MODERATE POWER (DI=%.3f): Uncertain power to detect dilution", di_result$di)
   } else {
-    "AMBIGUOUS: Weak DDS evidence; consistent with genuine null or underpowered dilution"
+    sprintf("LOW POWER (DI=%.3f): Underpowered to detect dilution", di_result$di)
   }
 
-  # Return S3 object
-  structure(
-    list(
-      inputs = list(
-        bulk_beta = bulk_beta,
-        bulk_se = bulk_se,
-        bulk_fdr = bulk_fdr,
-        d_sc = d_sc,
-        sc_zscore = sc_zscore,
-        cluster_fraction = cluster_fraction,
-        condition_fraction = condition_fraction,
-        n_cluster = n_cluster,
-        n_eff_basis = n_eff_basis,
-        n_donors = n_donors
-      ),
-      applicability = list(
-        applicable = applicability$applicable,
-        note = applicability$applicability_note
-      ),
-      dds = dds_result$dds_score,
-      mu_dilution = dds_result$mu_dilution,
-      z_bulk = dds_result$z_bulk,
+  # Compute interpretations (needed by downstream functions)
+  dds_interpretation <- dds_result$summary
+
+  di_interpretation <- if (di_result$di > 0.8) {
+    "High power"
+  } else if (di_result$di > 0.3) {
+    "Moderate power"
+  } else {
+    "Low power"
+  }
+
+  # Build output list (DDS removed from default per TASK 3)
+  result <- list(
+    inputs = list(
+      bulk_beta = bulk_beta,
+      bulk_se = bulk_se,
+      bulk_fdr = bulk_fdr,
       d_sc = dds_result$d_sc,
-      dds_interpretation = dds_interpretation,
-      di = di_result$di,
-      di_interpretation = di_interpretation,
-      verdict = verdict,
-      gate_status = if (applicability$applicable) "PASSED" else "FAILED",
-      # Store full objects for inspection
-      .dds_full = dds_result,
-      .di_full = di_result
+      sc_zscore = sc_zscore,
+      cluster_fraction = cluster_fraction,
+      condition_fraction = condition_fraction,
+      r = r,
+      n_cluster = n_cluster,
+      n_eff_basis = n_eff_basis,
+      n_donors = n_donors,
+      alpha = alpha,
+      sided = sided
     ),
-    class = "bulknull"
+    applicability = list(
+      applicable = applicability$applicable,
+      note = applicability$applicability_note
+    ),
+    mu_dilution = dds_result$mu_dilution,
+    z_bulk = dds_result$z_bulk,
+    w = dds_result$w,
+    d_sc = dds_result$d_sc,
+    dds_interpretation = dds_interpretation,
+    di = di_result$di,
+    di_interpretation = di_interpretation,
+    r = r,
+    verdict = verdict,
+    gate_status = if (applicability$applicable) "PASSED" else "FAILED",
+    # Store full objects for inspection
+    .dds_full = dds_result,
+    .di_full = di_result
   )
+
+  # Add type S, type M, and DDS only when verbose=TRUE
+  if (verbose) {
+    result$type_s <- type_s
+    result$type_m <- type_m
+    result$p_sig <- p_sig
+    result$dds <- dds_result$dds_score
+  }
+
+  structure(result, class = "bulknull")
 }

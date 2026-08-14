@@ -25,9 +25,9 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 LazyData: true
 NeedsCompilation: no
-Packaged: 2026-08-14 20:28:05 UTC; dritikaarora
+Packaged: 2026-08-14 22:11:53 UTC; dritikaarora
 Author: Itika Arora [aut, cre],
   Ahmed Yaqinuddin [aut],
   Alfaisal University [cph]
 Maintainer: Itika Arora <itiarora@alfaisal.edu>
-Built: R 4.5.3; ; 2026-08-14 20:28:54 UTC; unix
+Built: R 4.5.3; ; 2026-08-14 22:12:13 UTC; unix

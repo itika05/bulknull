@@ -15,6 +15,10 @@
 #'                                  responsible subcluster (0 < f <= 1).
 #' @param condition_fraction Numeric. Fraction of subcluster cells from the
 #'                                    condition of interest (e.g., IPF, 0 <= p <= 1).
+#' @param r Numeric. Relative expression: mean expression of gene in condition divided by
+#'           mean expression across whole compartment. Default r = 1. The mixture weight
+#'           w = (f*r)/(f*r + (1-f)) is bounded above by 1, so mu_dilution is bounded
+#'           by d_sc/bulk_se regardless of r value.
 #' @param n_cluster Integer. Number of cells in the subcluster. Required if sc_zscore supplied.
 #' @param n_eff_basis Character. Basis for sc_zscore conversion: "cell" or "donor".
 #'                             Default "cell". Ignored if d_sc supplied.
@@ -29,6 +33,7 @@
 #'   - dds_score: Posterior probability of dilution (0 to 1).
 #'   - z_bulk: Bulk z-score (beta / SE).
 #'   - mu_dilution: Expected z under dilution model.
+#'   - w: Mixture weight = (f*r)/(f*r + (1-f)), bounded by [0, 1].
 #'   - d_sc: Standardized effect size used (supplied or converted).
 #'   - log_lik_h1: Log-likelihood under dilution model.
 #'   - log_lik_h0: Log-likelihood under null model.
@@ -70,6 +75,7 @@ dilution_score <- function(
     sc_zscore = NULL,
     cluster_fraction,
     condition_fraction,
+    r = 1,
     n_cluster = NULL,
     n_eff_basis = c("cell", "donor"),
     n_donors = NULL,
@@ -88,6 +94,10 @@ dilution_score <- function(
   if (!(0 <= condition_fraction && condition_fraction <= 1)) {
     stop("condition_fraction must be in [0, 1]")
   }
+  if (r <= 0) stop("r (relative expression) must be positive")
+
+  # Compute mixture weight w = (f*r)/(f*r + (1-f))
+  w <- (cluster_fraction * r) / (cluster_fraction * r + (1 - cluster_fraction))
 
   # Handle d_sc vs sc_zscore: d_sc takes priority
   if (!is.null(d_sc) && !is.null(sc_zscore)) {
@@ -124,9 +134,9 @@ dilution_score <- function(
     on_violation = on_violation
   )
 
-  # Compute bulk z-score and mu_dilution
+  # Compute bulk z-score and mu_dilution using mixture weight w
   z_bulk <- bulk_beta / bulk_se
-  d_bulk_expected <- cluster_fraction * d_sc
+  d_bulk_expected <- w * d_sc
   mu_dilution <- d_bulk_expected / bulk_se
 
   # Likelihood ratio test
@@ -157,6 +167,7 @@ dilution_score <- function(
       dds_score = dds_score,
       z_bulk = z_bulk,
       mu_dilution = mu_dilution,
+      w = w,
       d_sc = d_sc,
       log_lik_h1 = log_lik_h1,
       log_lik_h0 = log_lik_h0,

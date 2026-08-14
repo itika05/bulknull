@@ -10,6 +10,7 @@
 #' @param d_sc numeric; standardized effect size in single-cell cluster
 #' @param bulk_se numeric; observed bulk measurement standard error
 #' @param target_di numeric; target diagnosability index (0 to 1, default 0.8)
+#' @param r numeric; relative expression parameter. Default 1 (no adjustment). Used for reference only.
 #' @param alpha numeric; significance level (default 0.05)
 #' @param sided character; "one" or "two" for one-sided or two-sided test (default "one")
 #'
@@ -48,7 +49,7 @@
 #'
 #' @importFrom stats qnorm
 #' @export
-critical_precision <- function(d_sc, bulk_se, target_di = 0.8, alpha = 0.05,
+critical_precision <- function(d_sc, bulk_se, target_di = 0.8, r = 1, alpha = 0.05,
                                 sided = c("one", "two")) {
 
   sided <- match.arg(sided)
