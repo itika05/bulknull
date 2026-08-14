@@ -32,7 +32,7 @@ mu_dilution (effect size) as the bulk z-score z_bulk varies over a specified ran
 The DDS is a function of both mu_dilution and z_bulk. For fixed mu_dilution,
 extreme values of z_bulk produce extreme DDS values. This function returns the
 interval of DDS that could arise if the true bulk z-score were anywhere in the
-specified range (typically \link{-1.96, 1.96} for typical bulk analyses).
+specified range (typically \code{[-1.96, 1.96]} for typical bulk analyses).
 
 Identity: DDS(z) = plogis(mu * z - mu^2/2)
 where plogis is the logistic CDF (inverse of logit).
