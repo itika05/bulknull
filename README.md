@@ -1,5 +1,9 @@
 # bulknull: Post-Hoc Diagnostic for Dilution in Cell-Type-Specific Expression
 
+<!-- badges: start -->
+[![Codecov test coverage](https://codecov.io/gh/dritikaarora/bulknull/graph/badge.svg)](https://app.codecov.io/gh/dritikaarora/bulknull)
+<!-- badges: end -->
+
 An R package for diagnosing whether an observed bulk-level null result reflects true dilution of a single-cell signal (small cluster fraction + hypothesised within-cluster effect) versus a false-positive single-cell call.
 
 **Important:** bulknull asks "IF there were a within-cluster IPF-vs-control effect of size X, would we have power to detect it?" It does NOT measure within-cluster effects directly. You supply a hypothesised effect size; the package computes power and posterior probability of dilution.
